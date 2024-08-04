@@ -30,7 +30,7 @@ class _MyAppState extends State<MyApp> {
         body: Center(
           child: currentIndex == 0 ? const MainPage()
                   : currentIndex == 1 ? const SearchPage()
-                  : const SettingsPage()
+                  : SettingsPage()
         ),
         bottomNavigationBar: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
