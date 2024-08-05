@@ -10,7 +10,6 @@ dependencies:
   cupertino_icons: ^1.0.8
   flutter:
     sdk: flutter
-  flutter_login_vk: ^2.2.2+1
   flutter_svg: ^2.0.10+1
   http: ^1.2.2
 
