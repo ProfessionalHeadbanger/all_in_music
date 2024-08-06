@@ -1,6 +1,7 @@
 import 'package:all_in_music/components/auth_button.dart';
 import 'package:all_in_music/components/custom_app_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -37,7 +38,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 const SizedBox(height: 10,),
                 AuthButton(
                   label: 'VK Music', 
-                  onPressed: (){}
+                  onPressed: (){context.go('/settings/vk-auth');}
                 ),
                 const SizedBox(height: 10,),
                 AuthButton(

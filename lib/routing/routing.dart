@@ -2,6 +2,7 @@ import 'package:all_in_music/pages/library_page.dart';
 import 'package:all_in_music/pages/root_page.dart';
 import 'package:all_in_music/pages/search_page.dart';
 import 'package:all_in_music/pages/settings_page.dart';
+import 'package:all_in_music/pages/vk_login_page.dart';
 import 'package:go_router/go_router.dart';
 
 final router = GoRouter(
@@ -31,6 +32,12 @@ final router = GoRouter(
             GoRoute(
               path: '/settings',
               builder: (context, state) => const SettingsPage(),
+              routes: [
+                GoRoute(
+                  path: 'vk-auth',
+                  builder: (context, state) => const VkLoginPage(),
+                )
+              ]
             ),
           ],
         ),
