@@ -1,3 +1,4 @@
+import 'package:all_in_music/api/vk_api/models/audio_model.dart';
 import 'package:dio/dio.dart';
 
 String? extractAccessToken(String input) {
@@ -20,7 +21,7 @@ String? extractAccessToken(String input) {
   return token;
 }
 
-Future<void> fetchAudio(String accessToken) async {
+Future<List<Audio>> fetchAudio(String accessToken) async {
   final dio = Dio(
     BaseOptions(
       headers: {
@@ -35,16 +36,17 @@ Future<void> fetchAudio(String accessToken) async {
     final response = await dio.get(url, queryParameters: params);
     if (response.statusCode == 200) {
       final data = response.data;
-      final List<dynamic> audioList = data['response']['items'];
-      for (var audio in audioList) {
-        print(audio);
-      }
+      final List<dynamic> audioListJson = data['response']['items'];
+      List<Audio> audioList = audioListJson.map((json) => Audio.fromJson(json)).toList();
+      return audioList;
     }
     else {
       print('Failed to load audio: ${response.statusMessage}');
+      return [];
     }
   }
   catch (e) {
     print('Error: $e');
+    return [];
   }
 }

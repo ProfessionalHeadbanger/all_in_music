@@ -1,5 +1,6 @@
+import 'package:all_in_music/api/vk_api/models/audio_model.dart';
 import 'package:all_in_music/components/custom_app_bar.dart';
-import 'package:all_in_music/utils/vk_utils/vk_utils.dart';
+import 'package:all_in_music/api/vk_api/vk_api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:go_router/go_router.dart';
@@ -47,8 +48,8 @@ class VkLoginPage extends StatelessWidget {
               return;
             }
 
-            fetchAudio(token);
-            context.pop();
+            List<Audio> audioList = await fetchAudio(token);
+            context.pop(audioList);
           },
         )
       ),
