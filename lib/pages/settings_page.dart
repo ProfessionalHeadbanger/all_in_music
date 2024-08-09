@@ -1,4 +1,4 @@
-import 'package:all_in_music/api/vk_api/models/audio_model.dart';
+import 'package:all_in_music/models/audio_model.dart';
 import 'package:all_in_music/components/auth_button.dart';
 import 'package:all_in_music/components/custom_app_bar.dart';
 import 'package:all_in_music/providers/audio_provider.dart';
@@ -36,7 +36,9 @@ class _SettingsPageState extends State<SettingsPage> {
                 const SizedBox(height: 10,),
                 AuthButton(
                   label: 'Spotify', 
-                  onPressed: (){}
+                  onPressed: () {
+                    context.go('/settings/spotify-auth');
+                  }
                 ),
                 const SizedBox(height: 10,),
                 AuthButton(

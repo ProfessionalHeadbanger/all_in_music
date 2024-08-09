@@ -27,7 +27,7 @@ class SongTile extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
-            child: Image.asset("assets/images/test.jpg", width: 50, height: 50, fit: BoxFit.cover,),
+            child: Image.asset("assets/images/default.png", width: 50, height: 50, fit: BoxFit.cover,),
           ),
           const SizedBox(width: 10,),
           Expanded(
@@ -38,16 +38,20 @@ class SongTile extends StatelessWidget {
                   title,
                   style: const TextStyle(
                     color: AppColors.primaryText,
-                    fontSize: 16.0,
+                    fontSize: 15.0,
                     fontWeight: FontWeight.bold,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 Text(
                   artist,
                   style: const TextStyle(
                     color: AppColors.secondaryText,
-                    fontSize: 14.0,
+                    fontSize: 13.0,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),

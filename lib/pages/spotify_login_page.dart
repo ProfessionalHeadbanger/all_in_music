@@ -1,38 +1,40 @@
-import 'package:all_in_music/models/audio_model.dart';
+import 'package:all_in_music/api/spotify_api/spotify_api.dart';
 import 'package:all_in_music/components/custom_app_bar.dart';
-import 'package:all_in_music/api/vk_api/vk_api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:go_router/go_router.dart';
 
-class VkLoginPage extends StatelessWidget {
-  const VkLoginPage({super.key});
+class SpotifyLoginPage extends StatelessWidget {
+  final String clientId;
+  final String clientSecret;
+  final String redirectUri;
+  const SpotifyLoginPage({super.key, required this.clientId, required this.redirectUri, required this.clientSecret});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(
         leading: IconButton(
-          icon: const Icon(Icons.chevron_left), 
+          icon: const Icon(Icons.chevron_left),
           onPressed: (){context.pop();},
         ),
-        title: 'VK auth',
+        title: 'Spotify auth',
       ),
       body: SafeArea(
         child: InAppWebView(
           initialUrlRequest: URLRequest(
-            url: WebUri("https://oauth.vk.com/authorize?client_id=2685278&scope=69634&redirect_uri=https://oauth.vk.com/blank.html&display=page&response_type=token&revoke=1"),
+            url: WebUri(getSpotifyAuthUrl(clientId, redirectUri)),
           ),
           onLoadStop: (InAppWebViewController controller, WebUri? action) async {
             if (action == null) {
               return;
             }
             String url = action.toString();
-            if (!url.startsWith("https://oauth.vk.com/blank.html")) {
+            if (!url.startsWith(redirectUri)) {
               return;
             }
-            String? token = extractAccessToken(url);
-            if (token == null) {
+            String? authCode = Uri.parse(url).queryParameters['code'];
+            if (authCode == null) {
               showDialog(
                 context: context, 
                 builder: (BuildContext context) {
@@ -46,12 +48,21 @@ class VkLoginPage extends StatelessWidget {
               );
               return;
             }
-
-            List<Audio> audioList = await fetchAudio(token);
-            context.pop(audioList);
+            final accessToken = await getAccessToken(clientId, clientSecret, authCode, redirectUri);
+            if (accessToken != null) {
+              print("Access token: $accessToken");
+              final tracks = await getFavoriteTracks(accessToken);
+              for (var track in tracks) {
+                print("Track: ${track['track']['name']} by ${track['track']['artists'][0]['name']}");
+              }
+            }
+            else {
+              print("Error getting access token");
+            }
+            context.pop();
           },
-        )
-      ),
+        ),
+      )
     );
   }
 }
