@@ -36,8 +36,11 @@ class _SettingsPageState extends State<SettingsPage> {
                 const SizedBox(height: 10,),
                 AuthButton(
                   label: 'Spotify', 
-                  onPressed: () {
-                    context.go('/settings/spotify-auth');
+                  onPressed: () async {
+                    final result = await context.push('/settings/spotify-auth') as List<Audio>?;
+                    if (result != null) {
+                      context.read<AudioProvider>().updateAudioList(result);
+                    }
                   }
                 ),
                 const SizedBox(height: 10,),

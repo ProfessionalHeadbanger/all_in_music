@@ -6,7 +6,9 @@ class SongTile extends StatelessWidget {
   final String title;
   final String artist;
   final int duration;
-  const SongTile({super.key, required this.title, required this.artist, required this.duration});
+  final String? coverUrl;
+  final Set<String> sources;
+  const SongTile({super.key, required this.title, required this.artist, required this.duration, this.coverUrl, required this.sources});
 
   String formatDuration(int duration) {
     final minutes = duration ~/ 60;
@@ -27,7 +29,9 @@ class SongTile extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
-            child: Image.asset("assets/images/default.png", width: 50, height: 50, fit: BoxFit.cover,),
+            child: coverUrl != null 
+            ? Image.network(coverUrl!, width: 50, height: 50, fit: BoxFit.cover,) 
+            : Image.asset("assets/images/default.png", width: 50, height: 50, fit: BoxFit.cover,),
           ),
           const SizedBox(width: 10,),
           Expanded(
@@ -61,13 +65,18 @@ class SongTile extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Row(
-                children: [
-                  SvgPicture.asset("assets/vectors/VK.svg", color: AppColors.primaryText, width: 20, height: 20,),
-                  const SizedBox(width: 5.0),
-                  SvgPicture.asset("assets/vectors/Spotify.svg", color: AppColors.primaryText, width: 20, height: 20,),
-                  const SizedBox(width: 5.0),
-                  SvgPicture.asset("assets/vectors/YandexMusic.svg", color: AppColors.primaryText, width: 20, height: 20,),
-                ],
+                children: sources.map((source) {
+                  switch (source) {
+                    case 'VK':
+                      return SvgPicture.asset("assets/vectors/VK.svg", color: AppColors.primaryText, width: 20, height: 20,);
+                    case 'Spotify': 
+                      return SvgPicture.asset("assets/vectors/Spotify.svg", color: AppColors.primaryText, width: 20, height: 20,);
+                    case 'YandexMusic':
+                      return SvgPicture.asset("assets/vectors/YandexMusic.svg", color: AppColors.primaryText, width: 20, height: 20,);
+                    default:
+                      return Container();
+                  }
+                }).toList(),
               ),
               const SizedBox(height: 10),
               Text(

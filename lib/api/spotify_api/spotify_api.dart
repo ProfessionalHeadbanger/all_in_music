@@ -1,3 +1,4 @@
+import 'package:all_in_music/models/audio_model.dart';
 import 'package:dio/dio.dart';
 
 String getSpotifyAuthUrl(String clientId, String redirectUri) {
@@ -33,9 +34,9 @@ Future<String?> getAccessToken(String clientId, String clientSecret, String auth
   }
 }
 
-Future<List<dynamic>> getFavoriteTracks(String accessToken) async {
+Future<List<Audio>> getFavoriteTracks(String accessToken) async {
   final dio = Dio();
-  List<dynamic> allTracks = [];
+  List<Audio> allTracks = [];
   String url = 'https://api.spotify.com/v1/me/tracks';
   int limit = 50;
   int offset = 0;
@@ -55,9 +56,11 @@ Future<List<dynamic>> getFavoriteTracks(String accessToken) async {
       ),
     );
 
+    print(response.statusCode);
     if (response.statusCode == 200) {
-      final items = response.data['items'];
-      allTracks.addAll(items);
+      final List<dynamic> items = response.data['items'];
+      List<Audio> tracks = items.map((json) => audioFromSpotify(json)).toList();
+      allTracks.addAll(tracks);
       if (response.data['next'] == null) {
         break;
       }

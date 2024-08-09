@@ -48,18 +48,24 @@ class SpotifyLoginPage extends StatelessWidget {
               );
               return;
             }
-            final accessToken = await getAccessToken(clientId, clientSecret, authCode, redirectUri);
-            if (accessToken != null) {
-              print("Access token: $accessToken");
-              final tracks = await getFavoriteTracks(accessToken);
-              for (var track in tracks) {
-                print("Track: ${track['track']['name']} by ${track['track']['artists'][0]['name']}");
-              }
+            String? accessToken = await getAccessToken(clientId, clientSecret, authCode, redirectUri);
+            if (accessToken == null) {
+              showDialog(
+                context: context, 
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text('Unable to auth'),
+                    actions: [
+                      TextButton(onPressed: (){context.pop();}, child: const Text('OK'))
+                    ],
+                  );
+                }
+              );
+              return;
             }
-            else {
-              print("Error getting access token");
-            }
-            context.pop();
+            
+            final tracks = await getFavoriteTracks(accessToken);
+            context.pop(tracks);
           },
         ),
       )

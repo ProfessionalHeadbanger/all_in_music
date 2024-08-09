@@ -37,7 +37,7 @@ Future<List<Audio>> fetchAudio(String accessToken) async {
     if (response.statusCode == 200) {
       final data = response.data;
       final List<dynamic> audioListJson = data['response']['items'];
-      List<Audio> audioList = audioListJson.map((json) => Audio.fromJson(json)).toList();
+      List<Audio> audioList = audioListJson.map((json) => audioFromVk(json)).toList();
       return audioList;
     }
     else {
