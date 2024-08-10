@@ -62,7 +62,7 @@ class _MainPageState extends State<MainPage> {
               itemCount: audioList.length,
               itemBuilder: (context, index) {
                 final audio = audioList[index];
-                return SongTile(title: audio.title, artist: audio.artist, duration: audio.duration, sources: audio.sources,);
+                return SongTile(title: audio.title, artist: audio.artist, duration: audio.duration, sources: audio.sources, coverUrl: audio.coverUrl,);
               },
             ),
           )
