@@ -36,7 +36,7 @@ final router = GoRouter(
               routes: [
                 GoRoute(
                   path: 'spotify-auth',
-                  builder: (context, state) => const SpotifyLoginPage(clientId: "CLIENT_ID", redirectUri: "http://localhost:3000", clientSecret: "CLIENT_SECRET"),
+                  builder: (context, state) => const SpotifyLoginPage(clientId: "be788300710c45cd89683cdb8bd5268b", redirectUri: "http://localhost:3000", clientSecret: "9c1ec56a023842748b26a0e3b5ef0842"),
                 ),
                 GoRoute(
                   path: 'vk-auth',
