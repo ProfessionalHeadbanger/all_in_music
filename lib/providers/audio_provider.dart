@@ -10,8 +10,7 @@ class AudioProvider with ChangeNotifier {
     for (var newAudio in newAudioList) {
       bool isDublicate = _audioList.any((audio) => 
         audio.title == newAudio.title && 
-        audio.artist == newAudio.artist &&
-        audio.duration == newAudio.duration
+        audio.artist == newAudio.artist
       );
       if (!isDublicate) {
         _audioList.add(newAudio);
@@ -19,8 +18,7 @@ class AudioProvider with ChangeNotifier {
       else {
         int index = _audioList.indexWhere((audio) => 
           audio.title == newAudio.title &&
-          audio.artist == newAudio.artist &&
-          audio.duration == newAudio.duration
+          audio.artist == newAudio.artist
         );
         _audioList[index].sources.addAll(newAudio.sources);
       }

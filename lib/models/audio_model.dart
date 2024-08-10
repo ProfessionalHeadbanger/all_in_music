@@ -15,10 +15,12 @@ class Audio {
 }
 
 Audio audioFromVk(Map<String, dynamic> vkTrack) {
+  String artists = vkTrack['artist'].replaceAll(RegExp(r'\s*(feat\.|ft\.)\s*', caseSensitive: false), ', ');
+
   return Audio(
     id: vkTrack['id'].toString(), 
     title: vkTrack['title'],
-    artist: vkTrack['artist'],
+    artist: artists,
     duration: vkTrack['duration'],
     sources: {'VK'},
     coverUrl: null,
@@ -27,10 +29,13 @@ Audio audioFromVk(Map<String, dynamic> vkTrack) {
 }
 
 Audio audioFromSpotify(Map<String, dynamic> spotifyTrack) {
+  List<dynamic> artistsList = spotifyTrack['track']['artists'];
+  String artists = artistsList.map((artist) => artist['name']).join(', ');
+
   return Audio(
     id: spotifyTrack['track']['id'],
     title: spotifyTrack['track']['name'],
-    artist: spotifyTrack['track']['artists'][0]['name'],
+    artist: artists,
     duration: spotifyTrack['track']['duration_ms'] ~/ 1000,
     sources: {'Spotify'},
     coverUrl: spotifyTrack['track']['album']['images'][0]['url'],
