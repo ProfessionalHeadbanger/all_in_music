@@ -39,36 +39,56 @@ Future<List<Audio>> getFavoriteTracks(String accessToken) async {
   List<Audio> allTracks = [];
   String url = 'https://api.spotify.com/v1/me/tracks';
   int limit = 50;
-  int offset = 0;
+  int maxRetries = 3;
 
-  while (true)
-  {
-    final response = await dio.get(
-      url,
-      queryParameters: {
-        'limit': limit,
-        'offset': offset,
-      },
-      options: Options(
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-        },
-      ),
-    );
+  Future<Response?> fetchWithRetry(String url, Map<String, dynamic> queryParameters) async {
+    int retryCount = 0;
+    while (retryCount < maxRetries) {
+      try {
+        final response = await dio.get(
+          url,
+          queryParameters: queryParameters,
+          options: Options(
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+            },
+          ),
+        );
+        return response;
+      } catch (e) {
+        if (e is DioException && (e.response?.statusCode == 401 || e.response?.statusCode == 429)) {
+          print('Authentication error or rate limit exceeded, retrying...');
+          retryCount++;
+          await Future.delayed(Duration(seconds: 2 * retryCount));
+        } else {
+          print('Error fetching tracks: $e');
+          break;
+        }
+      }
+    }
+    return null;
+  }
 
-    print(response.statusCode);
-    if (response.statusCode == 200) {
+  final initialResponse = await fetchWithRetry(url, {'limit': 1, 'offset': 0});
+  if (initialResponse == null || initialResponse.statusCode != 200) {
+    return [];
+  }
+
+  int totalTracks = initialResponse.data['total'];
+  int numRequests = (totalTracks / limit).ceil();
+
+  List<Future<Response?>> futures = [];
+  for (int i = 0; i < numRequests; i++) {
+    futures.add(fetchWithRetry(url, {'limit': limit, 'offset': i*limit}));
+  }
+  List<Response?> responses = await Future.wait(futures);
+  for (var response in responses) {
+    if (response != null && response.statusCode == 200) {
       final List<dynamic> items = response.data['items'];
       List<Audio> tracks = items.map((json) => audioFromSpotify(json)).toList();
       allTracks.addAll(tracks);
-      if (response.data['next'] == null) {
-        break;
-      }
-      offset += limit;
-    }
-    else {
-      print('Error fetching tracks: ${response.statusMessage}');
-      break;
+    } else {
+      print('Skipping response due to error');
     }
   }
 
