@@ -56,7 +56,12 @@ class _SettingsPageState extends State<SettingsPage> {
                 const SizedBox(height: 10,),
                 AuthButton(
                   label: 'Yandex Music', 
-                  onPressed: (){}
+                  onPressed: () async {
+                    final result = await context.push('/settings/yandex-auth') as List<Audio>?;
+                    if (result != null) {
+                      context.read<AudioProvider>().updateAudioList(result);
+                    }
+                  }
                 ),
                 const SizedBox(height: 40,),
               ],

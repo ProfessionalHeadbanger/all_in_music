@@ -42,3 +42,20 @@ Audio audioFromSpotify(Map<String, dynamic> spotifyTrack) {
     mp3Url: null,
   );
 }
+
+Audio audioFromYandex(Map<String, dynamic> yandexTrack, Map<String, dynamic> yandexAlbum) {
+  final artists = (yandexTrack['artists'] as List)
+          .map((artist) => artist['name'])
+          .join(', ');
+  return Audio(
+        id: yandexTrack['id'].toString(),
+        title: yandexTrack['title'],
+        artist: artists,
+        duration: yandexTrack['durationMs'] ~/ 1000,
+        sources: {'YandexMusic'},
+        coverUrl: yandexAlbum['coverUri'] != null 
+            ? 'https://${yandexAlbum['coverUri'].replaceAll('%%', '200x200')}'
+            : null,
+        mp3Url: null,
+      );
+}

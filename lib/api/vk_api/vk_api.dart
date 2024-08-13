@@ -1,16 +1,12 @@
 import 'package:all_in_music/models/audio_model.dart';
 import 'package:dio/dio.dart';
 
-String? extractAccessToken(String input) {
+String? extractAccessTokenVK(String input) {
   if (input.startsWith("vk1")) {
     return input;
   }
 
-  Match? tokenMatch = RegExp(
-    r"access_token=([^&]+)",
-  ).firstMatch(
-    input,
-  );
+  Match? tokenMatch = RegExp(r"access_token=([^&]+)",).firstMatch(input,);
 
   if (tokenMatch == null) return null;
 

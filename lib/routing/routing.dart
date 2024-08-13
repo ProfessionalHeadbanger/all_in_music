@@ -4,6 +4,7 @@ import 'package:all_in_music/pages/search_page.dart';
 import 'package:all_in_music/pages/settings_page.dart';
 import 'package:all_in_music/pages/spotify_login_page.dart';
 import 'package:all_in_music/pages/vk_login_page.dart';
+import 'package:all_in_music/pages/yandex_login_page.dart';
 import 'package:go_router/go_router.dart';
 
 final router = GoRouter(
@@ -42,6 +43,10 @@ final router = GoRouter(
                   path: 'vk-auth',
                   builder: (context, state) => const VkLoginPage(),
                 ),
+                GoRoute(
+                  path: 'yandex-auth',
+                  builder: (context, state) => const YandexLoginPage(),
+                )
               ]
             ),
           ],

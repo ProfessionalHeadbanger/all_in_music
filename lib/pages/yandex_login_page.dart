@@ -1,12 +1,11 @@
-import 'package:all_in_music/models/audio_model.dart';
+import 'package:all_in_music/api/yandex_api/yandex_api.dart';
 import 'package:all_in_music/components/custom_app_bar.dart';
-import 'package:all_in_music/api/vk_api/vk_api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:go_router/go_router.dart';
 
-class VkLoginPage extends StatelessWidget {
-  const VkLoginPage({super.key});
+class YandexLoginPage extends StatelessWidget {
+  const YandexLoginPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -16,22 +15,19 @@ class VkLoginPage extends StatelessWidget {
           icon: const Icon(Icons.chevron_left), 
           onPressed: (){context.pop();},
         ),
-        title: 'VK auth',
+        title: 'Yandex auth',
       ),
       body: SafeArea(
         child: InAppWebView(
           initialUrlRequest: URLRequest(
-            url: WebUri("https://oauth.vk.com/authorize?client_id=2685278&scope=69634&redirect_uri=https://oauth.vk.com/blank.html&display=page&response_type=token&revoke=1"),
+            url: WebUri("https://oauth.yandex.ru/authorize?response_type=token&client_id=23cabbbdc6cd418abb4b39c32c41195d"),
           ),
           onLoadStop: (InAppWebViewController controller, WebUri? action) async {
             if (action == null) {
               return;
             }
             String url = action.toString();
-            if (!url.startsWith("https://oauth.vk.com/blank.html")) {
-              return;
-            }
-            String? token = extractAccessTokenVK(url);
+            String? token = extractAccessTokenYandex(url);
             if (token == null) {
               showDialog(
                 context: context, 
@@ -46,9 +42,10 @@ class VkLoginPage extends StatelessWidget {
               );
               return;
             }
-
-            List<Audio> audioList = await fetchAudio(token);
-            context.pop(audioList);
+            final userId = await getYandexUserId(token);
+            final tracks = await getYandexFavorites(token, userId!);
+            print(tracks);
+            context.pop(tracks);
           },
         )
       ),
