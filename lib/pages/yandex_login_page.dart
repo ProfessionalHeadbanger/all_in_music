@@ -4,9 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:go_router/go_router.dart';
 
-class YandexLoginPage extends StatelessWidget {
+class YandexLoginPage extends StatefulWidget {
   const YandexLoginPage({super.key});
 
+  @override
+  State<YandexLoginPage> createState() => _YandexLoginPageState();
+}
+
+class _YandexLoginPageState extends State<YandexLoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -44,8 +49,10 @@ class YandexLoginPage extends StatelessWidget {
             }
             final userId = await getYandexUserId(token);
             final tracks = await getYandexFavorites(token, userId!);
-            print(tracks);
-            context.pop(tracks);
+
+            if (mounted) {
+              context.pop(tracks);
+            }
           },
         )
       ),

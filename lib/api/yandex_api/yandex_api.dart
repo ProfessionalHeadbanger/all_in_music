@@ -55,17 +55,22 @@ Future<List<Audio>> getYandexFavorites(String accessToken, String userId) async 
     if (response.statusCode == 200) {
       List<dynamic> tracks = response.data['result']['library']['tracks'];
 
-      for (var track in tracks) {
-        String trackId = track['id'];
-        String albumId = track['albumId'];
+      // Разделим треки на несколько частей, чтобы запрашивать их пакетами
+      const int batchSize = 50;
+      for (int i = 0; i < tracks.length; i += batchSize) {
+        List<String> trackIds = [];
+        List<String> albumIds = [];
 
-        Audio? trackInfo = await getYandexTrackInfo(trackId, albumId, accessToken);
-
-        if (trackInfo != null) {
-          favoriteTracks.add(trackInfo);
-        } else {
-          print('Failed to retrieve info for trackId: $trackId, albumId: $albumId');
+        for (int j = i; j < i + batchSize && j < tracks.length; j++) {
+          trackIds.add(tracks[j]['id']);
+          albumIds.add(tracks[j]['albumId']);
         }
+
+        // Запрашиваем информацию о нескольких треках сразу
+        List<Audio?> trackInfos = await getYandexTrackInfoBulk(trackIds, albumIds, accessToken);
+
+        // Добавляем только успешные треки
+        favoriteTracks.addAll(trackInfos.whereType<Audio>());
       }
     } else {
       print('Failed to load tracks: ${response.statusMessage}');
@@ -77,14 +82,17 @@ Future<List<Audio>> getYandexFavorites(String accessToken, String userId) async 
   return favoriteTracks;
 }
 
-Future<Audio?> getYandexTrackInfo(String trackId, String albumId, String accessToken) async {
+Future<List<Audio?>> getYandexTrackInfoBulk(List<String> trackIds, List<String> albumIds, String accessToken) async {
   final dio = Dio();
+  List<Audio?> tracks = [];
 
   try {
+    // Формируем запрос с несколькими ID треков
     final response = await dio.get(
-      'https://api.music.yandex.net/tracks/$trackId',
+      'https://api.music.yandex.net/tracks',
       queryParameters: {
-        'albumId': albumId,
+        'trackIds': trackIds.join(','),
+        'albumIds': albumIds.join(','),
       },
       options: Options(
         headers: {
@@ -94,16 +102,21 @@ Future<Audio?> getYandexTrackInfo(String trackId, String albumId, String accessT
     );
 
     if (response.statusCode == 200) {
-      final trackData = response.data['result'][0];
-      final albumData = trackData['albums'][0];
+      List<dynamic> trackDataList = response.data['result'];
 
-      return audioFromYandex(trackData, albumData);
+      for (int i = 0; i < trackDataList.length; i++) {
+        final trackData = trackDataList[i];
+        final albumData = trackData['albums'][0];
+
+        Audio? track = audioFromYandex(trackData, albumData);
+        tracks.add(track);
+      }
     } else {
-      print('Failed to fetch track info: ${response.statusMessage}');
-      return null;
+      print('Failed to fetch tracks info: ${response.statusMessage}');
     }
   } catch (e) {
     print('Error: $e');
-    return null;
   }
+
+  return tracks;
 }

@@ -4,12 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:go_router/go_router.dart';
 
-class SpotifyLoginPage extends StatelessWidget {
+class SpotifyLoginPage extends StatefulWidget {
   final String clientId;
   final String clientSecret;
   final String redirectUri;
   const SpotifyLoginPage({super.key, required this.clientId, required this.redirectUri, required this.clientSecret});
 
+  @override
+  State<SpotifyLoginPage> createState() => _SpotifyLoginPageState();
+}
+
+class _SpotifyLoginPageState extends State<SpotifyLoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -23,14 +28,14 @@ class SpotifyLoginPage extends StatelessWidget {
       body: SafeArea(
         child: InAppWebView(
           initialUrlRequest: URLRequest(
-            url: WebUri(getSpotifyAuthUrl(clientId, redirectUri)),
+            url: WebUri(getSpotifyAuthUrl(widget.clientId, widget.redirectUri)),
           ),
           onLoadStop: (InAppWebViewController controller, WebUri? action) async {
             if (action == null) {
               return;
             }
             String url = action.toString();
-            if (!url.startsWith(redirectUri)) {
+            if (!url.startsWith(widget.redirectUri)) {
               return;
             }
             String? authCode = Uri.parse(url).queryParameters['code'];
@@ -48,7 +53,7 @@ class SpotifyLoginPage extends StatelessWidget {
               );
               return;
             }
-            String? accessToken = await getAccessToken(clientId, clientSecret, authCode, redirectUri);
+            String? accessToken = await getAccessToken(widget.clientId, widget.clientSecret, authCode, widget.redirectUri);
             if (accessToken == null) {
               showDialog(
                 context: context, 
@@ -65,7 +70,9 @@ class SpotifyLoginPage extends StatelessWidget {
             }
             
             final tracks = await getFavoriteTracks(accessToken);
-            context.pop(tracks);
+            if (mounted) {
+              context.pop(tracks);
+            }
           },
         ),
       )

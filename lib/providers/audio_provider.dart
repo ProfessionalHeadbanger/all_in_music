@@ -2,7 +2,7 @@ import 'package:all_in_music/models/audio_model.dart';
 import 'package:flutter/material.dart';
 
 class AudioProvider with ChangeNotifier {
-  List<Audio> _audioList = [];
+  final List<Audio> _audioList = [];
   
   List<Audio> get audioList => _audioList;
 

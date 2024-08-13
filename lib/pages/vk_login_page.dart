@@ -5,9 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:go_router/go_router.dart';
 
-class VkLoginPage extends StatelessWidget {
+class VkLoginPage extends StatefulWidget {
   const VkLoginPage({super.key});
 
+  @override
+  State<VkLoginPage> createState() => _VkLoginPageState();
+}
+
+class _VkLoginPageState extends State<VkLoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -48,7 +53,9 @@ class VkLoginPage extends StatelessWidget {
             }
 
             List<Audio> audioList = await fetchAudio(token);
-            context.pop(audioList);
+            if (mounted) {
+              context.pop(audioList);
+            }
           },
         )
       ),
