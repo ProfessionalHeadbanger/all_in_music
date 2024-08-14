@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class Audio {
   final String id;
   final String title;
@@ -11,6 +13,31 @@ class Audio {
 
   void addSource(String source) {
     sources.add(source);
+  }
+
+  String toJson() {
+    return json.encode({
+      'id': id,
+      'title': title,
+      'artist': artist,
+      'duration': duration,
+      'sources': sources.toList(),
+      'coverUrl': coverUrl,
+      'mp3Url': mp3Url,
+    });
+}
+
+  factory Audio.fromJson(String jsonStr) {
+    final jsonMap = json.decode(jsonStr);
+    return Audio(
+      id: jsonMap['id'],
+      title: jsonMap['title'],
+      artist: jsonMap['artist'],
+      duration: jsonMap['duration'],
+      sources: Set<String>.from(jsonMap['sources']),
+      coverUrl: jsonMap['coverUrl'],
+      mp3Url: jsonMap['mp3Url'],
+    );
   }
 }
 
