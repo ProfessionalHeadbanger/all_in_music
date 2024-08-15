@@ -18,4 +18,6 @@ class AppColors {
   static const primaryPressedButton = Color(0xff8D7DB9);
   static const secondaryPressedButton = Color(0xffB0A0DB);
 
+  static const primaryAudioProgress = Color(0xffD9D9D9);
+  static const secondaryAudioProgress = Color(0xff717171);
 }

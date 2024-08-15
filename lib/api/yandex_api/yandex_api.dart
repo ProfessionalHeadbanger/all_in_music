@@ -55,7 +55,6 @@ Future<List<Audio>> getYandexFavorites(String accessToken, String userId) async 
     if (response.statusCode == 200) {
       List<dynamic> tracks = response.data['result']['library']['tracks'];
 
-      // Разделим треки на несколько частей, чтобы запрашивать их пакетами
       const int batchSize = 50;
       for (int i = 0; i < tracks.length; i += batchSize) {
         List<String> trackIds = [];
@@ -66,10 +65,8 @@ Future<List<Audio>> getYandexFavorites(String accessToken, String userId) async 
           albumIds.add(tracks[j]['albumId']);
         }
 
-        // Запрашиваем информацию о нескольких треках сразу
         List<Audio?> trackInfos = await getYandexTrackInfoBulk(trackIds, albumIds, accessToken);
 
-        // Добавляем только успешные треки
         favoriteTracks.addAll(trackInfos.whereType<Audio>());
       }
     } else {
@@ -87,7 +84,6 @@ Future<List<Audio?>> getYandexTrackInfoBulk(List<String> trackIds, List<String> 
   List<Audio?> tracks = [];
 
   try {
-    // Формируем запрос с несколькими ID треков
     final response = await dio.get(
       'https://api.music.yandex.net/tracks',
       queryParameters: {
