@@ -1,3 +1,4 @@
+import 'package:all_in_music/api/yandex_api/yandex_api.dart';
 import 'package:all_in_music/assets/app_vectors.dart';
 import 'package:all_in_music/components/custom_app_bar.dart';
 import 'package:all_in_music/components/filter_button.dart';
@@ -5,6 +6,7 @@ import 'package:all_in_music/components/mini_player.dart';
 import 'package:all_in_music/components/song_tile.dart';
 import 'package:all_in_music/models/audio_model.dart';
 import 'package:all_in_music/providers/audio_provider.dart';
+import 'package:all_in_music/providers/auth_provider.dart';
 import 'package:all_in_music/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -25,6 +27,7 @@ class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     final audioList = context.watch<AudioProvider>().audioList;
+    final YandexToken = context.watch<AuthProvider>().yandexAccessToken;
 
     return Scaffold(
       appBar: CustomAppBar(
@@ -80,8 +83,13 @@ class _MainPageState extends State<MainPage> {
                         setState(() {
                           _selectedAudio = audio;
                         });
-                        if (audio.mp3Url != null) {
+                        if (audio.sources.contains('VK') && audio.mp3Url != null) {
                           await _audioPlayer.setUrl(audio.mp3Url!);
+                          _audioPlayer.play();
+                        }
+                        else {
+                          final mp3Url = await getTrackUrl(audio.id, YandexToken!);
+                          await _audioPlayer.setUrl(mp3Url!);
                           _audioPlayer.play();
                         }
                       },

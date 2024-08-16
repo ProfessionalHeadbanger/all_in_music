@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
 import 'package:all_in_music/models/audio_model.dart';
 import 'package:dio/dio.dart';
 
@@ -115,4 +117,59 @@ Future<List<Audio?>> getYandexTrackInfoBulk(List<String> trackIds, List<String> 
   }
 
   return tracks;
+}
+
+Future<String?> getTrackUrl(String trackId, String accessToken) async {
+  final trackInfo = await getDownloadInfo(trackId, accessToken);
+  if (trackInfo != null) {
+    String? url = createTrackURL(trackInfo);
+    print('URL: $url');
+    return url;
+  }
+  return null;
+}
+
+Future<Map<String, dynamic>?> getDownloadInfo(String trackId, String accessToken) async {
+  final dio = Dio();
+
+  try {
+    // Получаем информацию о загрузке
+    final response = await dio.get(
+      'https://api.music.yandex.net/tracks/$trackId/download-info',
+      options: Options(
+        headers: {'Authorization': 'OAuth $accessToken'},
+      ),
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> trackInfo = response.data['result'];
+      final isAuthorized = accessToken.isNotEmpty;
+      final selectedInfo = isAuthorized
+          ? trackInfo.firstWhere((item) => item['codec'] == 'mp3' && !item['preview'])
+          : trackInfo[0];
+
+      // Получаем детальную информацию о загрузке
+      final directLinkResponse = await dio.get(
+        '${selectedInfo['downloadInfoUrl']}&format=json',
+        options: Options(
+          headers: {'Authorization': 'OAuth $accessToken'},
+        ),
+      );
+
+      if (directLinkResponse.statusCode == 200) {
+        return directLinkResponse.data;
+      }
+    }
+  } catch (e) {
+    print('Error: $e');
+  }
+  return null;
+}
+
+String createTrackURL(Map<String, dynamic> info) {
+  final trackUrl = 'XGRlBW9FXlekgbPrRHuSiA${info['path'].substring(1)}${info['s']}';
+  final hashedUrl = md5.convert(utf8.encode(trackUrl)).toString();
+  final link = 'https://${info['host']}/get-mp3/$hashedUrl/${info['ts']}${info['path']}';
+
+  return link;
 }

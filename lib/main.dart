@@ -1,4 +1,5 @@
 import 'package:all_in_music/providers/audio_provider.dart';
+import 'package:all_in_music/providers/auth_provider.dart';
 import 'package:all_in_music/routing/routing.dart';
 import 'package:flutter/material.dart';
 import 'package:all_in_music/theme/app_theme.dart';
@@ -9,6 +10,7 @@ void main() {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AudioProvider()),
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
       ],
       child: const MyApp(),
     ),

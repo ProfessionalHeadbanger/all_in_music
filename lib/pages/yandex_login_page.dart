@@ -1,8 +1,10 @@
 import 'package:all_in_music/api/yandex_api/yandex_api.dart';
 import 'package:all_in_music/components/custom_app_bar.dart';
+import 'package:all_in_music/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 class YandexLoginPage extends StatefulWidget {
   const YandexLoginPage({super.key});
@@ -51,6 +53,7 @@ class _YandexLoginPageState extends State<YandexLoginPage> {
             final tracks = await getYandexFavorites(token, userId!);
 
             if (mounted) {
+              context.read<AuthProvider>().setYandexAccessToken(token);
               context.pop(tracks);
             }
           },
