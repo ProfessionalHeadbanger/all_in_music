@@ -1,10 +1,13 @@
+import 'package:all_in_music/models/audio_model.dart';
 import 'package:all_in_music/pages/library_page.dart';
+import 'package:all_in_music/pages/player_page.dart';
 import 'package:all_in_music/pages/root_page.dart';
 import 'package:all_in_music/pages/search_page.dart';
 import 'package:all_in_music/pages/settings_page.dart';
 import 'package:all_in_music/pages/vk_login_page.dart';
 import 'package:all_in_music/pages/yandex_login_page.dart';
 import 'package:go_router/go_router.dart';
+import 'package:just_audio/just_audio.dart';
 
 final router = GoRouter(
   initialLocation: '/main',
@@ -47,6 +50,15 @@ final router = GoRouter(
           ],
         ),
       ]
+    ),
+    GoRoute(
+      path: '/player',
+      builder: (context, state) {
+        final extra = state.extra as Map<String, dynamic>;
+        final audio = extra['audio'] as Audio;
+        final audioPlayer = extra['audioPlayer'] as AudioPlayer;
+        return PlayerPage(audio: audio, audioPlayer: audioPlayer,);
+      },
     )
   ]
 );

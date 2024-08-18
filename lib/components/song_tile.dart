@@ -72,8 +72,6 @@ class SongTile extends StatelessWidget {
                     switch (source) {
                       case 'VK':
                         return SvgPicture.asset("assets/vectors/VK.svg", color: AppColors.primaryText, width: 20, height: 20,);
-                      case 'Spotify': 
-                        return SvgPicture.asset("assets/vectors/Spotify.svg", color: AppColors.primaryText, width: 20, height: 20,);
                       case 'YandexMusic':
                         return SvgPicture.asset("assets/vectors/YandexMusic.svg", color: AppColors.primaryText, width: 20, height: 20,);
                       default:

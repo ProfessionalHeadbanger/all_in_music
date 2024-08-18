@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -97,7 +98,14 @@ class _MainPageState extends State<MainPage> {
           ),
           if (_selectedAudio != null) Align(
             alignment: Alignment.bottomCenter,
-            child: MiniPlayer(audio: _selectedAudio!, audioPlayer: _audioPlayer)),
+            child: MiniPlayer(
+              audio: _selectedAudio!, 
+              audioPlayer: _audioPlayer,
+              onTap: () {
+                context.push('/player', extra: {'audio': _selectedAudio!, 'audioPlayer': _audioPlayer});
+              },
+            )
+          ),
         ],
       ),
     );

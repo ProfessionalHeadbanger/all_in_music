@@ -6,6 +6,8 @@ class AppColors {
 
   static const primaryText = Color(0xffFFFFFF);
   static const secondaryText = Color(0xff8A9A9D);
+  static const miniPlayerArtistText = Color(0xffC0CACC);
+  static const playerArtistText = Color(0xffA5A5A5);
 
   static const primaryIcon = Color(0xffFFFFFF);
   static const secondaryIcon = Color(0xffA5A9D0);
