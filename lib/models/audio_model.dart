@@ -55,21 +55,6 @@ Audio audioFromVk(Map<String, dynamic> vkTrack) {
   );
 }
 
-Audio audioFromSpotify(Map<String, dynamic> spotifyTrack) {
-  List<dynamic> artistsList = spotifyTrack['track']['artists'];
-  String artists = artistsList.map((artist) => artist['name']).join(', ');
-
-  return Audio(
-    id: spotifyTrack['track']['id'],
-    title: spotifyTrack['track']['name'],
-    artist: artists,
-    duration: spotifyTrack['track']['duration_ms'] ~/ 1000,
-    sources: {'Spotify'},
-    coverUrl: spotifyTrack['track']['album']['images'][0]['url'],
-    mp3Url: null,
-  );
-}
-
 Audio audioFromYandex(Map<String, dynamic> yandexTrack, Map<String, dynamic> yandexAlbum) {
   final artists = (yandexTrack['artists'] as List)
           .map((artist) => artist['name'])

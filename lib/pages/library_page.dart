@@ -54,10 +54,6 @@ class _MainPageState extends State<MainPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     FilterButton(
-                      label: 'Spotify',
-                      onPressed: (){},
-                    ),
-                    FilterButton(
                       label: 'VK Music',
                       onPressed: (){},
                     ),
