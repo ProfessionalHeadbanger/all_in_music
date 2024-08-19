@@ -133,7 +133,6 @@ Future<Map<String, dynamic>?> getDownloadInfo(String trackId, String accessToken
   final dio = Dio();
 
   try {
-    // Получаем информацию о загрузке
     final response = await dio.get(
       'https://api.music.yandex.net/tracks/$trackId/download-info',
       options: Options(
@@ -148,7 +147,6 @@ Future<Map<String, dynamic>?> getDownloadInfo(String trackId, String accessToken
           ? trackInfo.firstWhere((item) => item['codec'] == 'mp3' && !item['preview'])
           : trackInfo[0];
 
-      // Получаем детальную информацию о загрузке
       final directLinkResponse = await dio.get(
         '${selectedInfo['downloadInfoUrl']}&format=json',
         options: Options(
@@ -172,4 +170,27 @@ String createTrackURL(Map<String, dynamic> info) {
   final link = 'https://${info['host']}/get-mp3/$hashedUrl/${info['ts']}${info['path']}';
 
   return link;
+}
+
+Future<String?> getYandexUserAvatar(String accessToken) async {
+  final dio = Dio();
+
+  try {
+    final response = await dio.get(
+      'https://login.yandex.ru/info?format=json&oauth_token=$accessToken',
+    );
+
+    if (response.statusCode == 200) {
+      final data = response.data;
+      if (data['default_avatar_id'] != null) {
+        final avatarId = data['default_avatar_id'];
+        return 'https://avatars.yandex.net/get-yapic/$avatarId/islands-200';
+      }
+    } else {
+      print('Failed to load Yandex user avatar: ${response.statusMessage}');
+    }
+  } catch (e) {
+    print('Error: $e');
+  }
+  return null;
 }

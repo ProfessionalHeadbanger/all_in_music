@@ -46,3 +46,36 @@ Future<List<Audio>> fetchAudio(String accessToken) async {
     return [];
   }
 }
+
+Future<String?> getVkUserAvatar(String accessToken) async {
+  final dio = Dio(
+    BaseOptions(
+      headers: {
+        "User-Agent": "KateMobileAndroid/109.1 lite-550 (Android 13; SDK 33; x86_64; Google Pixel 5; ru)",
+      },
+    ),
+  );
+
+  final url = 'https://api.vk.com/method/users.get';
+  final params = {
+    'access_token': accessToken,
+    'v': '5.131',
+    'fields': 'photo_200',
+  };
+
+  try {
+    final response = await dio.get(url, queryParameters: params);
+
+    if (response.statusCode == 200) {
+      final data = response.data['response'];
+      if (data != null && data.isNotEmpty) {
+        return data[0]['photo_200'];
+      }
+    } else {
+      print('Failed to load VK user avatar: ${response.statusMessage}');
+    }
+  } catch (e) {
+    print('Error: $e');
+  }
+  return null;
+}

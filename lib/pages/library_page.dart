@@ -28,7 +28,7 @@ class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     final audioList = context.watch<AudioProvider>().audioList;
-    final YandexToken = context.watch<AuthProvider>().yandexAccessToken;
+    final yandexToken = context.watch<AuthProvider>().yandexAccessToken;
 
     return Scaffold(
       appBar: CustomAppBar(
@@ -85,7 +85,7 @@ class _MainPageState extends State<MainPage> {
                           _audioPlayer.play();
                         }
                         else {
-                          final mp3Url = await getTrackUrl(audio.id, YandexToken!);
+                          final mp3Url = await getTrackUrl(audio.id, yandexToken!);
                           await _audioPlayer.setUrl(mp3Url!);
                           _audioPlayer.play();
                         }

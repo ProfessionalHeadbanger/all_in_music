@@ -22,4 +22,7 @@ class AppColors {
 
   static const primaryAudioProgress = Color(0xffD9D9D9);
   static const secondaryAudioProgress = Color(0xff717171);
+
+  static const vkColor = Color(0xff0077FF);
+  static const yandexColor = Color(0xffFC3F1D);
 }

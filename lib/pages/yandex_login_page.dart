@@ -49,12 +49,13 @@ class _YandexLoginPageState extends State<YandexLoginPage> {
               );
               return;
             }
-            final userId = await getYandexUserId(token);
-            final tracks = await getYandexFavorites(token, userId!);
-
-            if (mounted) {
+            else {
               context.read<AuthProvider>().setYandexAccessToken(token);
-              context.pop(tracks);
+              final userId = await getYandexUserId(token);
+              final tracks = await getYandexFavorites(token, userId!);
+              if (mounted) {
+                context.pop(tracks);
+              }
             }
           },
         )

@@ -1,9 +1,11 @@
 import 'package:all_in_music/models/audio_model.dart';
 import 'package:all_in_music/components/custom_app_bar.dart';
 import 'package:all_in_music/api/vk_api/vk_api.dart';
+import 'package:all_in_music/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 class VkLoginPage extends StatefulWidget {
   const VkLoginPage({super.key});
@@ -51,10 +53,12 @@ class _VkLoginPageState extends State<VkLoginPage> {
               );
               return;
             }
-
-            List<Audio> audioList = await fetchAudio(token);
-            if (mounted) {
-              context.pop(audioList);
+            else {
+              context.read<AuthProvider>().setVkAccessToken(token);
+              List<Audio> audioList = await fetchAudio(token);
+              if (mounted) {
+                context.pop(audioList);
+              }
             }
           },
         )
