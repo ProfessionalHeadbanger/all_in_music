@@ -1,9 +1,12 @@
+import 'dart:math';
+
 import 'package:all_in_music/models/audio_model.dart';
 
 class PlaybackQueue {
   final List<Audio> _fullAudioList;
   List<Audio> _currentQueue = [];
   int _currentIndex = 0;
+  bool _isShuffleMode = false;
 
   PlaybackQueue(this._fullAudioList);
 
@@ -14,6 +17,7 @@ class PlaybackQueue {
   void createQueueFrom(int startIndex) {
     _currentQueue = [];
     _currentIndex = 0;
+    _isShuffleMode = false;
 
     int i = 0;
     while (i < 100 && startIndex + i < _fullAudioList.length) {
@@ -29,14 +33,31 @@ class PlaybackQueue {
     }
   }
 
+  void createShuffledQueue() {
+    _currentQueue = [];
+    _currentIndex = 0;
+    _isShuffleMode = true;
+
+    List<Audio> shuffledList = List<Audio>.from(_fullAudioList);
+    shuffledList.shuffle(Random());
+
+    for (int i = 0; i < 100 && i < shuffledList.length; i++) {
+      _currentQueue.add(shuffledList[i]);
+    }
+  }
+
   void advanceQueue() {
     _currentIndex++;
     if (_currentIndex >= _currentQueue.length) {
-      if (_currentQueue.last == _fullAudioList.last) {
-        createQueueFrom(0);
+      if (_isShuffleMode) {
+        createShuffledQueue();
       } else {
-        int nextStartIndex = _fullAudioList.indexOf(_currentQueue.last) + 1;
-        createQueueFrom(nextStartIndex);
+        if (_currentQueue.last == _fullAudioList.last) {
+          createQueueFrom(0);
+        } else {
+          int nextStartIndex = _fullAudioList.indexOf(_currentQueue.last) + 1;
+          createQueueFrom(nextStartIndex);
+        }
       }
     }
   }

@@ -1,7 +1,9 @@
+import 'package:all_in_music/assets/app_vectors.dart';
 import 'package:all_in_music/components/custom_app_bar.dart';
 import 'package:all_in_music/models/audio_model.dart';
 import 'package:all_in_music/theme/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:just_audio/just_audio.dart';
 
@@ -16,12 +18,22 @@ class PlayerPage extends StatelessWidget {
       appBar: CustomAppBar(
         leading: IconButton(
           onPressed: () => context.pop(), 
-          icon: const Icon(Icons.chevron_left),
+          icon: SvgPicture.asset(
+                  AppVectors.chevronLeft,
+                  color: AppColors.primaryIcon,
+                  width: 21,
+                  height: 21,
+                ),
         ),
         actions: [
           IconButton(
             onPressed: (){}, 
-            icon: const Icon(Icons.more_horiz),
+            icon: SvgPicture.asset(
+                  AppVectors.moreHorizontal,
+                  color: AppColors.primaryIcon,
+                  width: 21,
+                  height: 21,
+                ),
           )
         ],
       ),
@@ -146,7 +158,12 @@ class PlayerPage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               IconButton(
-                icon: const Icon(Icons.shuffle, color: Colors.white70),
+                icon: SvgPicture.asset(
+                  AppVectors.shuffle,
+                  color: AppColors.primaryIcon,
+                  width: 21,
+                  height: 21,
+                ),
                 onPressed: () {
                   // Обработка нажатия кнопки "Shuffle"
                 },
@@ -154,22 +171,47 @@ class PlayerPage extends StatelessWidget {
               Row(
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.skip_previous, color: Colors.white),
-                    iconSize: 30,
+                    icon: SvgPicture.asset(
+                      AppVectors.skipBack,
+                      color: AppColors.primaryIcon,
+                      width: 21,
+                      height: 21,
+                    ),
                     onPressed: () {
                       // Обработка нажатия кнопки "Previous"
                     },
                   ),
                   IconButton(
-                    icon: const Icon(Icons.play_circle_fill, color: Colors.white),
+                    icon: StreamBuilder<PlayerState>(
+                      stream: audioPlayer.playerStateStream, 
+                      builder: (context, snapshot) {
+                        final playerState = snapshot.data;
+                        final isPlaying = playerState?.playing;
+                        if (isPlaying == true) {
+                          return const Icon(Icons.pause_circle_filled, color: Colors.white,);
+                        }
+                        else {
+                          return const Icon(Icons.play_circle_fill, color: Colors.white,);
+                        }
+                      },
+                    ),
                     iconSize: 64,
                     onPressed: () {
-                      // Обработка нажатия кнопки "Play/Pause"
+                      if (audioPlayer.playing) {
+                        audioPlayer.pause();
+                      }
+                      else {
+                        audioPlayer.play();
+                      }
                     },
                   ),
                   IconButton(
-                    icon: const Icon(Icons.skip_next, color: Colors.white),
-                    iconSize: 30,
+                    icon: SvgPicture.asset(
+                      AppVectors.skipForward,
+                      color: AppColors.primaryIcon,
+                      width: 21,
+                      height: 21,
+                    ),
                     onPressed: () {
                       // Обработка нажатия кнопки "Next"
                     },
@@ -177,7 +219,12 @@ class PlayerPage extends StatelessWidget {
                 ],
               ),
               IconButton(
-                icon: const Icon(Icons.repeat, color: Colors.white70),
+                icon: SvgPicture.asset(
+                  AppVectors.repeat,
+                  color: AppColors.primaryIcon,
+                  width: 21,
+                  height: 21,
+                ),
                 onPressed: () {
                   // Обработка нажатия кнопки "Repeat"
                 },

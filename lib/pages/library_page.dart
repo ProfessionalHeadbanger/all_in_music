@@ -55,18 +55,20 @@ class _MainPageState extends State<MainPage> {
   Future<void> _playAudio(String? yandexToken) async {
     if (_currentAudio != null) {
       print('Starting playback for: ${_currentAudio!.title}');
-      if (_currentAudio!.sources.contains('VK') && _currentAudio!.mp3Url != null) {
-        await _audioPlayer.setUrl(_currentAudio!.mp3Url!);
-        _audioPlayer.play();
-      } else {
-        final mp3Url = await getTrackUrl(_currentAudio!.id, yandexToken!);
-        if (mp3Url != null) {
-          await _audioPlayer.setUrl(mp3Url);
-          _audioPlayer.play();
+        if (_currentAudio!.sources.contains('VK')) {
+          if (_currentAudio!.mp3Url != null && _currentAudio!.mp3Url != "") {
+            await _audioPlayer.setUrl(_currentAudio!.mp3Url!);
+            _audioPlayer.play();
+          }
         } else {
-          print('Failed to retrieve MP3 URL for Yandex Music track.');
+          final mp3Url = await getTrackUrl(_currentAudio!.id, yandexToken!);
+          if (mp3Url != null) {
+            await _audioPlayer.setUrl(mp3Url);
+            _audioPlayer.play();
+          } else {
+            print('Failed to retrieve MP3 URL for Yandex Music track.');
+          }
         }
-      }
     }
   }
 
@@ -77,6 +79,17 @@ class _MainPageState extends State<MainPage> {
       int startIndex = audioList.indexOf(audio);
       _playbackQueue?.createQueueFrom(startIndex);
       _currentAudio = audio;
+    });
+
+    _playAudio(context.read<AuthProvider>().yandexAccessToken);
+  }
+
+  void _onShuffleSelected() {
+    setState(() {
+      final audioList = context.read<AudioProvider>().audioList;
+      _playbackQueue = PlaybackQueue(audioList);
+      _playbackQueue?.createShuffledQueue();
+      _currentAudio = _playbackQueue!.currentAudio;
     });
 
     _playAudio(context.read<AuthProvider>().yandexAccessToken);
@@ -110,14 +123,28 @@ class _MainPageState extends State<MainPage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    FilterButton(
-                      label: 'VK Music',
-                      onPressed: (){},
+                    Row(
+                      children: [
+                        FilterButton(
+                          label: 'VK Music',
+                          onPressed: (){},
+                        ),
+                        const SizedBox(width: 10,),
+                        FilterButton(
+                          label: 'Yandex Music',
+                          onPressed: (){},
+                        ),
+                      ],
                     ),
-                    FilterButton(
-                      label: 'Yandex Music',
-                      onPressed: (){},
-                    ),
+                    IconButton(
+                      onPressed: _onShuffleSelected, 
+                      icon: SvgPicture.asset(
+                        AppVectors.shuffle,
+                        color: AppColors.primaryIcon,
+                        width: 18,
+                        height: 18,
+                      ),
+                    )
                   ],
                 ),
               ),
