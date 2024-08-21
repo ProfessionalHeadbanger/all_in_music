@@ -3,7 +3,7 @@ import 'package:all_in_music/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 
-class MiniPlayer extends StatelessWidget {
+class MiniPlayer extends StatefulWidget {
   final Audio audio;
   final AudioPlayer audioPlayer;
   final VoidCallback? onTap;
@@ -11,9 +11,14 @@ class MiniPlayer extends StatelessWidget {
   const MiniPlayer({super.key, required this.audio, required this.audioPlayer, this.onTap});
 
   @override
+  State<MiniPlayer> createState() => _MiniPlayerState();
+}
+
+class _MiniPlayerState extends State<MiniPlayer> {
+  @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: onTap,
+      onTap: widget.onTap,
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 1),
         padding: const EdgeInsets.only(left: 12, right: 12, top: 3, bottom: 7),
@@ -28,8 +33,8 @@ class MiniPlayer extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8),
-                  child: audio.coverUrl != null 
-                  ? Image.network(audio.coverUrl!, width: 40, height: 40, fit: BoxFit.cover,) 
+                  child: widget.audio.coverUrl != null 
+                  ? Image.network(widget.audio.coverUrl!, width: 40, height: 40, fit: BoxFit.cover,) 
                   : Image.asset("assets/images/default.png", width: 40, height: 40, fit: BoxFit.cover,),
                 ),
                 const SizedBox(width: 12,),
@@ -39,7 +44,7 @@ class MiniPlayer extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        audio.title,
+                        widget.audio.title,
                         style: const TextStyle(
                           color: AppColors.primaryText,
                           fontWeight: FontWeight.bold,
@@ -49,7 +54,7 @@ class MiniPlayer extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
-                        audio.artist,
+                        widget.audio.artist,
                         style: const TextStyle(
                           color: AppColors.miniPlayerArtistText,
                           fontWeight: FontWeight.bold,
@@ -63,7 +68,7 @@ class MiniPlayer extends StatelessWidget {
                 ),
                 IconButton(
                   icon: StreamBuilder<PlayerState>(
-                    stream: audioPlayer.playerStateStream, 
+                    stream: widget.audioPlayer.playerStateStream, 
                     builder: (context, snapshot) {
                       final playerState = snapshot.data;
                       return Icon(
@@ -74,11 +79,11 @@ class MiniPlayer extends StatelessWidget {
                     }
                   ),
                   onPressed: () {
-                    if (audioPlayer.playing) {
-                      audioPlayer.pause();
+                    if (widget.audioPlayer.playing) {
+                      widget.audioPlayer.pause();
                     }
                     else {
-                      audioPlayer.play();
+                      widget.audioPlayer.play();
                     }
                   },
                 ),
@@ -86,11 +91,11 @@ class MiniPlayer extends StatelessWidget {
             ),
             const SizedBox(height: 6,),
             StreamBuilder<Duration>(
-              stream: audioPlayer.positionStream,
+              stream: widget.audioPlayer.positionStream,
               builder: (context, snapshot) {
                 final position = snapshot.data ?? Duration.zero;
                 return LinearProgressIndicator(
-                  value: position.inMilliseconds / (audioPlayer.duration?.inMilliseconds ?? 1),
+                  value: position.inMilliseconds / (widget.audioPlayer.duration?.inMilliseconds ?? 1),
                   backgroundColor: AppColors.secondaryAudioProgress,
                   valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primaryAudioProgress),
                   borderRadius: BorderRadius.circular(2),
