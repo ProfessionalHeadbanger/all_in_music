@@ -7,6 +7,7 @@ import 'package:all_in_music/components/song_tile.dart';
 import 'package:all_in_music/models/audio_model.dart';
 import 'package:all_in_music/providers/audio_provider.dart';
 import 'package:all_in_music/providers/auth_provider.dart';
+import 'package:all_in_music/providers/current_audio_provider.dart';
 import 'package:all_in_music/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -36,7 +37,7 @@ class _MainPageState extends State<MainPage> {
     
     _audioPlayer.playerStateStream.listen((state) async {
       if (state.processingState == ProcessingState.completed) {
-        _onTrackComplete();
+        await _onTrackComplete();
       }
     });
   }
@@ -46,25 +47,21 @@ class _MainPageState extends State<MainPage> {
   }
 
   Future<void> _playAudio(Audio audio) async {
-    setState(() {
-          _currentAudio = audio;
-    });
+    final audioProvider = context.read<CurrentAudioProvider>();
+    audioProvider.setAudio(audio, _audioPlayer);
 
-    if (_currentAudio != null) {
-      print('Starting playback for: ${_currentAudio!.title}');
-      if (_currentAudio!.sources.contains('VK')) {
-        if (_currentAudio!.mp3Url != null && _currentAudio!.mp3Url != "") {
-          await _audioPlayer.setUrl(_currentAudio!.mp3Url!);
-          _audioPlayer.play();
-        }
+    if (audio.sources.contains('VK')) {
+      if (audio.mp3Url != null && audio.mp3Url != "") {
+        await _audioPlayer.setUrl(audio.mp3Url!);
+        _audioPlayer.play();
+      }
+    } else {
+      final mp3Url = await getTrackUrl(audio.id, context.read<AuthProvider>().yandexAccessToken!);
+      if (mp3Url != null) {
+        await _audioPlayer.setUrl(mp3Url);
+        _audioPlayer.play();
       } else {
-        final mp3Url = await getTrackUrl(_currentAudio!.id, context.read<AuthProvider>().yandexAccessToken!);
-        if (mp3Url != null) {
-          await _audioPlayer.setUrl(mp3Url);
-          _audioPlayer.play();
-        } else {
-          print('Failed to retrieve MP3 URL for Yandex Music track.');
-        }
+        print('Failed to retrieve MP3 URL for Yandex Music track.');
       }
     }
   }
@@ -73,17 +70,21 @@ class _MainPageState extends State<MainPage> {
   if (_isShuffleMode) {
     final currentIndex = _shuffledAudioList.indexOf(_currentAudio!);
     final nextIndex = (currentIndex + 1) % _shuffledAudioList.length;
-    await _playAudio(_shuffledAudioList[nextIndex]);
+    _currentAudio = _shuffledAudioList[nextIndex];
   } else {
     final currentIndex = _audioList.indexOf(_currentAudio!);
     final nextIndex = (currentIndex + 1) % _audioList.length;
-    await _playAudio(_audioList[nextIndex]);
+    _currentAudio = _audioList[nextIndex];
   }
+
+  await _playAudio(_currentAudio!);
+  context.read<CurrentAudioProvider>().setAudio(_currentAudio!, _audioPlayer);
 }
 
   void _onSongSelected(Audio audio) {
     setState(() {
       _isShuffleMode = false;
+      _currentAudio = audio;
       _playAudio(audio);
     });
   }
@@ -170,12 +171,16 @@ class _MainPageState extends State<MainPage> {
           ),
           if (_currentAudio != null) Align(
             alignment: Alignment.bottomCenter,
-            child: MiniPlayer(
-              audio: _currentAudio!, 
-              audioPlayer: _audioPlayer,
-              onTap: () {
-                context.push('/player', extra: {'audio': _currentAudio!, 'audioPlayer': _audioPlayer});
-              },
+            child: Consumer<CurrentAudioProvider>(
+              builder: (context, currentAudioProvider, _) {
+                return MiniPlayer(
+                  audio: context.read<CurrentAudioProvider>().currentAudio!, 
+                  audioPlayer: context.read<CurrentAudioProvider>().audioPlayer!,
+                  onTap: () {
+                    context.push('/player');
+                  },
+                );
+              }
             )
           ),
         ],

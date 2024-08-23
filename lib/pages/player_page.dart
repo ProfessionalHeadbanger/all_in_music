@@ -1,19 +1,21 @@
 import 'package:all_in_music/assets/app_vectors.dart';
 import 'package:all_in_music/components/custom_app_bar.dart';
-import 'package:all_in_music/models/audio_model.dart';
+import 'package:all_in_music/providers/current_audio_provider.dart';
 import 'package:all_in_music/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:provider/provider.dart';
 
 class PlayerPage extends StatelessWidget {
-  final Audio audio;
-  final AudioPlayer audioPlayer;
-  const PlayerPage({super.key, required this.audio, required this.audioPlayer});
+  const PlayerPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final currentAudio = context.watch<CurrentAudioProvider>().currentAudio;
+    final audioPlayer = context.watch<CurrentAudioProvider>().audioPlayer;
+
     return Scaffold(
       appBar: CustomAppBar(
         leading: IconButton(
@@ -48,8 +50,8 @@ class PlayerPage extends StatelessWidget {
               aspectRatio: 1/1,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(15),
-                child: audio.coverUrl != null 
-                  ? Image.network(audio.coverUrl!, width: 400, height: 400, fit: BoxFit.cover,) 
+                child: currentAudio!.coverUrl != null 
+                  ? Image.network(currentAudio.coverUrl!, width: 400, height: 400, fit: BoxFit.cover,) 
                   : Image.asset("assets/images/default.png", width: 400, height: 400, fit: BoxFit.cover,),
               ),
             ),
@@ -63,12 +65,12 @@ class PlayerPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  audio.title, // Используем название трека из объекта Audio
+                  currentAudio.title, // Используем название трека из объекта Audio
                   style: const TextStyle(fontSize: 22, color: AppColors.primaryText, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  audio.artist, // Используем имя исполнителя из объекта Audio
+                  currentAudio.artist, // Используем имя исполнителя из объекта Audio
                   style: const TextStyle(fontSize: 14, color: AppColors.playerArtistText, fontWeight: FontWeight.bold),
                 ),
               ],
@@ -83,7 +85,7 @@ class PlayerPage extends StatelessWidget {
               children: [
                 // Прогресс-бар
                 StreamBuilder<Duration?>(
-                  stream: audioPlayer.durationStream,
+                  stream: audioPlayer!.durationStream,
                   builder: (context, snapshot) {
                     final duration = snapshot.data ?? Duration.zero;
                     return StreamBuilder<Duration>(
