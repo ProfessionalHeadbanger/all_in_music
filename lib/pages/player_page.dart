@@ -179,8 +179,8 @@ class PlayerPage extends StatelessWidget {
                       width: 21,
                       height: 21,
                     ),
-                    onPressed: () {
-                      // Обработка нажатия кнопки "Previous"
+                    onPressed: () async {
+                      await context.read<CurrentAudioProvider>().playPreviousTrack(context);
                     },
                   ),
                   IconButton(
@@ -214,8 +214,8 @@ class PlayerPage extends StatelessWidget {
                       width: 21,
                       height: 21,
                     ),
-                    onPressed: () {
-                      // Обработка нажатия кнопки "Next"
+                    onPressed: () async {
+                      await context.read<CurrentAudioProvider>().playNextTrack(context);
                     },
                   ),
                 ],

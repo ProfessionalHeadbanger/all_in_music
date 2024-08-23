@@ -1,4 +1,3 @@
-import 'package:all_in_music/api/yandex_api/yandex_api.dart';
 import 'package:all_in_music/assets/app_vectors.dart';
 import 'package:all_in_music/components/custom_app_bar.dart';
 import 'package:all_in_music/components/filter_button.dart';
@@ -6,7 +5,6 @@ import 'package:all_in_music/components/mini_player.dart';
 import 'package:all_in_music/components/song_tile.dart';
 import 'package:all_in_music/models/audio_model.dart';
 import 'package:all_in_music/providers/audio_provider.dart';
-import 'package:all_in_music/providers/auth_provider.dart';
 import 'package:all_in_music/providers/current_audio_provider.dart';
 import 'package:all_in_music/theme/app_colors.dart';
 import 'package:flutter/material.dart';
@@ -23,80 +21,31 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  final AudioPlayer _audioPlayer = AudioPlayer();
   List<Audio> _audioList = [];
-  List<Audio> _shuffledAudioList = [];
-  Audio? _currentAudio;
-  bool _isShuffleMode = false;
 
   @override
   void initState() {
     super.initState();
 
     _audioList = context.read<AudioProvider>().audioList;
+    context.read<CurrentAudioProvider>().setAudioList(_audioList);
     
-    _audioPlayer.playerStateStream.listen((state) async {
+    context.read<CurrentAudioProvider>().audioPlayer?.playerStateStream.listen((state) async {
       if (state.processingState == ProcessingState.completed) {
-        await _onTrackComplete();
+        await context.read<CurrentAudioProvider>().playNextTrack(context);
       }
     });
   }
-
-  Future<void> _onTrackComplete() async {
-    await _playNextTrack();
-  }
-
-  Future<void> _playAudio(Audio audio) async {
-    final audioProvider = context.read<CurrentAudioProvider>();
-    audioProvider.setAudio(audio, _audioPlayer);
-
-    if (audio.sources.contains('VK')) {
-      if (audio.mp3Url != null && audio.mp3Url != "") {
-        await _audioPlayer.setUrl(audio.mp3Url!);
-        _audioPlayer.play();
-      }
-    } else {
-      final mp3Url = await getTrackUrl(audio.id, context.read<AuthProvider>().yandexAccessToken!);
-      if (mp3Url != null) {
-        await _audioPlayer.setUrl(mp3Url);
-        _audioPlayer.play();
-      } else {
-        print('Failed to retrieve MP3 URL for Yandex Music track.');
-      }
-    }
-  }
-
-  Future<void> _playNextTrack() async {
-  if (_isShuffleMode) {
-    final currentIndex = _shuffledAudioList.indexOf(_currentAudio!);
-    final nextIndex = (currentIndex + 1) % _shuffledAudioList.length;
-    _currentAudio = _shuffledAudioList[nextIndex];
-  } else {
-    final currentIndex = _audioList.indexOf(_currentAudio!);
-    final nextIndex = (currentIndex + 1) % _audioList.length;
-    _currentAudio = _audioList[nextIndex];
-  }
-
-  await _playAudio(_currentAudio!);
-  context.read<CurrentAudioProvider>().setAudio(_currentAudio!, _audioPlayer);
-}
 
   void _onSongSelected(Audio audio) {
-    setState(() {
-      _isShuffleMode = false;
-      _currentAudio = audio;
-      _playAudio(audio);
-    });
+    context.read<CurrentAudioProvider>().setAudio(audio);
+    context.read<CurrentAudioProvider>().playAudio(context);
   }
 
   void _onShuffleSelected() {
-  setState(() {
-    _isShuffleMode = true;
-    _shuffledAudioList = List<Audio>.from(_audioList);
-    _shuffledAudioList.shuffle();
-    _playAudio(_shuffledAudioList.first);
-  });
-}
+    context.read<CurrentAudioProvider>().toggleShuffleMode();
+    context.read<CurrentAudioProvider>().playAudio(context);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -169,19 +118,15 @@ class _MainPageState extends State<MainPage> {
               ),
             ],
           ),
-          if (_currentAudio != null) Align(
+          if (context.watch<CurrentAudioProvider>().currentAudio != null) Align(
             alignment: Alignment.bottomCenter,
-            child: Consumer<CurrentAudioProvider>(
-              builder: (context, currentAudioProvider, _) {
-                return MiniPlayer(
-                  audio: context.read<CurrentAudioProvider>().currentAudio!, 
-                  audioPlayer: context.read<CurrentAudioProvider>().audioPlayer!,
-                  onTap: () {
-                    context.push('/player');
-                  },
-                );
-              }
-            )
+            child: MiniPlayer(
+              audio: context.watch<CurrentAudioProvider>().currentAudio!,
+              audioPlayer: context.watch<CurrentAudioProvider>().audioPlayer!,
+              onTap: () {
+                context.push('/player');
+              },
+            ),
           ),
         ],
       ),
