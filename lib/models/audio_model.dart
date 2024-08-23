@@ -6,8 +6,8 @@ class Audio {
   final String artist;
   final int duration;
   final Set<String> sources;
-  final String? coverUrl;
-  final String? mp3Url;
+  String? coverUrl;
+  String? mp3Url;
 
   Audio({required this.id, required this.title, required this.artist, required this.duration, required this.sources, this.coverUrl, this.mp3Url});
 

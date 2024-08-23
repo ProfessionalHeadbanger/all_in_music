@@ -5,7 +5,6 @@ import 'package:all_in_music/components/filter_button.dart';
 import 'package:all_in_music/components/mini_player.dart';
 import 'package:all_in_music/components/song_tile.dart';
 import 'package:all_in_music/models/audio_model.dart';
-import 'package:all_in_music/models/playback_queue.dart';
 import 'package:all_in_music/providers/audio_provider.dart';
 import 'package:all_in_music/providers/auth_provider.dart';
 import 'package:all_in_music/theme/app_colors.dart';
@@ -24,76 +23,79 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   final AudioPlayer _audioPlayer = AudioPlayer();
-  PlaybackQueue? _playbackQueue;
+  List<Audio> _audioList = [];
+  List<Audio> _shuffledAudioList = [];
   Audio? _currentAudio;
+  bool _isShuffleMode = false;
 
   @override
   void initState() {
     super.initState();
 
+    _audioList = context.read<AudioProvider>().audioList;
+    
     _audioPlayer.playerStateStream.listen((state) async {
       if (state.processingState == ProcessingState.completed) {
-        try {
-          setState(() {
-            print('Track completed, advancing queue.');
-            _playbackQueue?.advanceQueue();
-            _currentAudio = _playbackQueue?.currentAudio;
-          });
-          if (_currentAudio != null) {
-            await _playAudio(context.read<AuthProvider>().yandexAccessToken);
-          } else {
-            print('No audio to play next.');
-          }
-        } catch (e, stacktrace) {
-          print('Error while advancing queue: $e');
-          print('Stacktrace: $stacktrace');
-        }
+        _onTrackComplete();
       }
     });
   }
 
-  Future<void> _playAudio(String? yandexToken) async {
+  Future<void> _onTrackComplete() async {
+    await _playNextTrack();
+  }
+
+  Future<void> _playAudio(Audio audio) async {
+    setState(() {
+          _currentAudio = audio;
+    });
+
     if (_currentAudio != null) {
       print('Starting playback for: ${_currentAudio!.title}');
-        if (_currentAudio!.sources.contains('VK')) {
-          if (_currentAudio!.mp3Url != null && _currentAudio!.mp3Url != "") {
-            await _audioPlayer.setUrl(_currentAudio!.mp3Url!);
-            _audioPlayer.play();
-          }
-        } else {
-          final mp3Url = await getTrackUrl(_currentAudio!.id, yandexToken!);
-          if (mp3Url != null) {
-            await _audioPlayer.setUrl(mp3Url);
-            _audioPlayer.play();
-          } else {
-            print('Failed to retrieve MP3 URL for Yandex Music track.');
-          }
+      if (_currentAudio!.sources.contains('VK')) {
+        if (_currentAudio!.mp3Url != null && _currentAudio!.mp3Url != "") {
+          await _audioPlayer.setUrl(_currentAudio!.mp3Url!);
+          _audioPlayer.play();
         }
+      } else {
+        final mp3Url = await getTrackUrl(_currentAudio!.id, context.read<AuthProvider>().yandexAccessToken!);
+        if (mp3Url != null) {
+          await _audioPlayer.setUrl(mp3Url);
+          _audioPlayer.play();
+        } else {
+          print('Failed to retrieve MP3 URL for Yandex Music track.');
+        }
+      }
     }
   }
 
+  Future<void> _playNextTrack() async {
+  if (_isShuffleMode) {
+    final currentIndex = _shuffledAudioList.indexOf(_currentAudio!);
+    final nextIndex = (currentIndex + 1) % _shuffledAudioList.length;
+    await _playAudio(_shuffledAudioList[nextIndex]);
+  } else {
+    final currentIndex = _audioList.indexOf(_currentAudio!);
+    final nextIndex = (currentIndex + 1) % _audioList.length;
+    await _playAudio(_audioList[nextIndex]);
+  }
+}
+
   void _onSongSelected(Audio audio) {
     setState(() {
-      final audioList = context.read<AudioProvider>().audioList;
-      _playbackQueue = PlaybackQueue(audioList);
-      int startIndex = audioList.indexOf(audio);
-      _playbackQueue?.createQueueFrom(startIndex);
-      _currentAudio = audio;
+      _isShuffleMode = false;
+      _playAudio(audio);
     });
-
-    _playAudio(context.read<AuthProvider>().yandexAccessToken);
   }
 
   void _onShuffleSelected() {
-    setState(() {
-      final audioList = context.read<AudioProvider>().audioList;
-      _playbackQueue = PlaybackQueue(audioList);
-      _playbackQueue?.createShuffledQueue();
-      _currentAudio = _playbackQueue!.currentAudio;
-    });
-
-    _playAudio(context.read<AuthProvider>().yandexAccessToken);
-  }
+  setState(() {
+    _isShuffleMode = true;
+    _shuffledAudioList = List<Audio>.from(_audioList);
+    _shuffledAudioList.shuffle();
+    _playAudio(_shuffledAudioList.first);
+  });
+}
 
   @override
   Widget build(BuildContext context) {
