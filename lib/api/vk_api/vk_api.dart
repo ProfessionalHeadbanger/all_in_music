@@ -26,7 +26,7 @@ Future<List<Audio>> fetchAudio(String accessToken) async {
     )
   );
   const url = 'https://api.vk.com/method/audio.get';
-  final params = {'access_token' : accessToken, 'v' : '5.199'};
+  final params = {'access_token' : accessToken, 'v' : '5.199', 'count': 6000};
 
   try {
     final response = await dio.get(url, queryParameters: params);
@@ -56,7 +56,7 @@ Future<String?> getVkUserAvatar(String accessToken) async {
     ),
   );
 
-  final url = 'https://api.vk.com/method/users.get';
+  const url = 'https://api.vk.com/method/users.get';
   final params = {
     'access_token': accessToken,
     'v': '5.131',

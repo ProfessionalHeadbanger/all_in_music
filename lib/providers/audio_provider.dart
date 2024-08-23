@@ -25,12 +25,24 @@ class AudioProvider with ChangeNotifier {
           audio.title == newAudio.title &&
           audio.artist == newAudio.artist
         );
-        _audioList[index].sources.addAll(newAudio.sources);
+        _updateExistingAudio(_audioList[index], newAudio);
       }
     }
 
     await _saveTracksToStorage();
     notifyListeners();
+  }
+
+  void _updateExistingAudio(Audio existingAudio, Audio newAudio) {
+    existingAudio.sources.addAll(newAudio.sources);
+
+    if (existingAudio.mp3Url == null && newAudio.mp3Url != null) {
+      existingAudio.mp3Url = newAudio.mp3Url;
+    }
+
+    if (existingAudio.coverUrl == null && newAudio.coverUrl != null) {
+      existingAudio.coverUrl = newAudio.coverUrl;
+    }
   }
 
   Future<void> _saveTracksToStorage() async {
