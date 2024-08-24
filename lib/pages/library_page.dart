@@ -22,13 +22,14 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   List<Audio> _audioList = [];
+  bool _isVkMusicSelected = false;
+  bool _isYandexMusicSelected = false;
 
   @override
   void initState() {
     super.initState();
-
-    _audioList = context.read<AudioProvider>().audioList;
-    context.read<CurrentAudioProvider>().setAudioList(_audioList);
+    
+    _loadAudioList();
     
     context.read<CurrentAudioProvider>().audioPlayer?.playerStateStream.listen((state) async {
       if (state.processingState == ProcessingState.completed) {
@@ -43,6 +44,13 @@ class _MainPageState extends State<MainPage> {
     });
   }
 
+  Future<void> _loadAudioList() async {
+  await context.read<AudioProvider>().loadTracksFromStorage();
+  setState(() {
+    _audioList = context.read<AudioProvider>().audioList;
+  });
+}
+
   void _onSongSelected(Audio audio) {
     context.read<CurrentAudioProvider>().setAudio(audio);
     context.read<CurrentAudioProvider>().playAudio(context);
@@ -53,9 +61,42 @@ class _MainPageState extends State<MainPage> {
     context.read<CurrentAudioProvider>().playAudio(context);
   }
 
+  List<Audio> _filterAudioList() {
+    if (_isVkMusicSelected && !_isYandexMusicSelected) {
+      return _audioList.where((audio) => audio.sources.contains('VK')).toList();
+    } 
+    else if (_isYandexMusicSelected && !_isVkMusicSelected) {
+      return _audioList.where((audio) => audio.sources.contains('YandexMusic')).toList();
+    } 
+    else {
+      return _audioList;
+    }
+  }
+
+  void _onVkFilterSelected() {
+    setState(() {
+      _isVkMusicSelected = !_isVkMusicSelected;
+      if (_isVkMusicSelected && _isYandexMusicSelected) {
+        _isVkMusicSelected = false;
+        _isYandexMusicSelected = false;
+      }
+    });
+  }
+
+  void _onYandexFilterSelected() {
+    setState(() {
+      _isYandexMusicSelected = !_isYandexMusicSelected;
+      if (_isVkMusicSelected && _isYandexMusicSelected) {
+        _isVkMusicSelected = false;
+        _isYandexMusicSelected = false;
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    final audioList = context.watch<AudioProvider>().audioList;
+    final filteredAudioList = _filterAudioList();
+    context.read<CurrentAudioProvider>().setAudioList(filteredAudioList);
 
     return Scaffold(
       appBar: CustomAppBar(
@@ -85,12 +126,18 @@ class _MainPageState extends State<MainPage> {
                       children: [
                         FilterButton(
                           label: 'VK Music',
-                          onPressed: (){},
+                          onPressed: _onVkFilterSelected,
+                          gradientColors: _isVkMusicSelected 
+                            ? [AppColors.primaryPressedButton, AppColors.secondaryPressedButton]
+                            : [AppColors.primaryUnpressedButton, AppColors.secondaryUnpressedButton],
                         ),
                         const SizedBox(width: 10,),
                         FilterButton(
                           label: 'Yandex Music',
-                          onPressed: (){},
+                          onPressed: _onYandexFilterSelected,
+                          gradientColors: _isYandexMusicSelected 
+                            ? [AppColors.primaryPressedButton, AppColors.secondaryPressedButton]
+                            : [AppColors.primaryUnpressedButton, AppColors.secondaryUnpressedButton],
                         ),
                       ],
                     ),
@@ -108,9 +155,9 @@ class _MainPageState extends State<MainPage> {
               ),
               Expanded(
                 child: ListView.builder(
-                  itemCount: audioList.length,
+                  itemCount: filteredAudioList.length,
                   itemBuilder: (context, index) {
-                    final audio = audioList[index];
+                    final audio = filteredAudioList[index];
                     return SongTile(
                       title: audio.title, 
                       artist: audio.artist, 

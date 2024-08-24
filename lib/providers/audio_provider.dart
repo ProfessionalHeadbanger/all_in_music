@@ -7,10 +7,6 @@ class AudioProvider with ChangeNotifier {
   
   List<Audio> get audioList => _audioList;
 
-  AudioProvider() {
-    _loadTracksFromStorage();
-  }
-
   void updateAudioList(List<Audio> newAudioList) async {
     for (var newAudio in newAudioList) {
       bool isDublicate = _audioList.any((audio) => 
@@ -51,7 +47,7 @@ class AudioProvider with ChangeNotifier {
     await prefs.setStringList('savedTracks', tracksJson);
   }
 
-  Future<void> _loadTracksFromStorage() async {
+  Future<void> loadTracksFromStorage() async {
     final prefs = await SharedPreferences.getInstance();
     List<String>? tracksJson = prefs.getStringList('savedTracks');
 
