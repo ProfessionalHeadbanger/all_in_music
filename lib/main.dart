@@ -6,12 +6,17 @@ import 'package:flutter/material.dart';
 import 'package:all_in_music/theme/app_theme.dart';
 import 'package:provider/provider.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final authProvider = AuthProvider();
+  await authProvider.loadTokens();
+
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AudioProvider()),
-        ChangeNotifierProvider(create: (_) => AuthProvider()..loadTokens()),
+        ChangeNotifierProvider(create: (_) => authProvider),
         ChangeNotifierProvider(create: (_) => CurrentAudioProvider()),
       ],
       child: const MyApp(),
