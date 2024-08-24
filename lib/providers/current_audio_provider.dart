@@ -11,12 +11,16 @@ class CurrentAudioProvider with ChangeNotifier {
   List<Audio> _audioList = [];
   List<Audio> _shuffledAudioList = [];
   bool _isShuffleMode = false;
+  bool _isRepeatMode = false;
 
   Audio? get currentAudio => _currentAudio;
   AudioPlayer? get audioPlayer => _audioPlayer;
+  bool get isShuffleMode => _isShuffleMode;
+  bool get isRepeatMode => _isRepeatMode;
 
   void setAudio(Audio audio) {
     _currentAudio = audio;
+    _isShuffleMode = false;
     notifyListeners();
   }
 
@@ -28,6 +32,19 @@ class CurrentAudioProvider with ChangeNotifier {
 
   void toggleShuffleMode() {
     _isShuffleMode = !_isShuffleMode;
+    notifyListeners();
+  }
+
+  void shuffleAndPlay() {
+    _isShuffleMode = true;
+    _shuffledAudioList = List<Audio>.from(_audioList);
+    _shuffledAudioList.shuffle();
+    _currentAudio = _shuffledAudioList.first;
+    notifyListeners();
+  }
+
+  void toggleRepeatMode() {
+    _isRepeatMode = !_isRepeatMode;
     notifyListeners();
   }
 

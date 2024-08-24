@@ -162,12 +162,12 @@ class PlayerPage extends StatelessWidget {
               IconButton(
                 icon: SvgPicture.asset(
                   AppVectors.shuffle,
-                  color: AppColors.primaryIcon,
+                  color: context.watch<CurrentAudioProvider>().isShuffleMode ? AppColors.secondaryIcon : AppColors.primaryIcon,
                   width: 21,
                   height: 21,
                 ),
                 onPressed: () {
-                  // Обработка нажатия кнопки "Shuffle"
+                  context.read<CurrentAudioProvider>().toggleShuffleMode();
                 },
               ),
               Row(
@@ -223,12 +223,12 @@ class PlayerPage extends StatelessWidget {
               IconButton(
                 icon: SvgPicture.asset(
                   AppVectors.repeat,
-                  color: AppColors.primaryIcon,
+                  color: context.watch<CurrentAudioProvider>().isRepeatMode ? AppColors.secondaryIcon : AppColors.primaryIcon,
                   width: 21,
                   height: 21,
                 ),
                 onPressed: () {
-                  // Обработка нажатия кнопки "Repeat"
+                  context.read<CurrentAudioProvider>().toggleRepeatMode();
                 },
               ),
             ],

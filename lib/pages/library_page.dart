@@ -32,7 +32,13 @@ class _MainPageState extends State<MainPage> {
     
     context.read<CurrentAudioProvider>().audioPlayer?.playerStateStream.listen((state) async {
       if (state.processingState == ProcessingState.completed) {
-        await context.read<CurrentAudioProvider>().playNextTrack(context);
+        if (context.read<CurrentAudioProvider>().isRepeatMode) {
+          await context.read<CurrentAudioProvider>().audioPlayer?.seek(Duration.zero);
+          context.read<CurrentAudioProvider>().audioPlayer?.play();
+        } 
+        else {
+          await context.read<CurrentAudioProvider>().playNextTrack(context);
+        }
       }
     });
   }
@@ -43,7 +49,7 @@ class _MainPageState extends State<MainPage> {
   }
 
   void _onShuffleSelected() {
-    context.read<CurrentAudioProvider>().toggleShuffleMode();
+    context.read<CurrentAudioProvider>().shuffleAndPlay();
     context.read<CurrentAudioProvider>().playAudio(context);
   }
 
