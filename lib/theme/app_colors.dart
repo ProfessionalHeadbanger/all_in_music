@@ -25,4 +25,6 @@ class AppColors {
 
   static const vkColor = Color(0xff0077FF);
   static const yandexColor = Color(0xffFC3F1D);
+
+  static const searchBar = Color(0xffF6E8FF);
 }

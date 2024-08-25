@@ -46,11 +46,11 @@ class _MainPageState extends State<MainPage> {
   }
 
   Future<void> _loadAudioList() async {
-  await context.read<AudioProvider>().loadTracksFromStorage();
-  setState(() {
-    _audioList = context.read<AudioProvider>().audioList;
-  });
-}
+    await context.read<AudioProvider>().loadTracksFromStorage();
+    setState(() {
+      _audioList = context.read<AudioProvider>().audioList;
+    });
+  }
 
   void _onSongSelected(Audio audio) {
     context.read<CurrentAudioProvider>().setAudio(audio);
