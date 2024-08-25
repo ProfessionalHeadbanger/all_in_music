@@ -69,14 +69,21 @@ class SongTile extends StatelessWidget {
               children: [
                 Row(
                   children: sources.map((source) {
+                    Widget icon;
                     switch (source) {
                       case 'VK':
-                        return SvgPicture.asset("assets/vectors/VK.svg", color: AppColors.primaryText, width: 20, height: 20,);
+                        icon = SvgPicture.asset("assets/vectors/VK.svg", color: AppColors.primaryText, width: 20, height: 20);
+                        break;
                       case 'YandexMusic':
-                        return SvgPicture.asset("assets/vectors/YandexMusic.svg", color: AppColors.primaryText, width: 20, height: 20,);
+                        icon = SvgPicture.asset("assets/vectors/YandexMusic.svg", color: AppColors.primaryText, width: 20, height: 20);
+                        break;
                       default:
-                        return Container();
+                        icon = Container();
                     }
+                    return Padding(
+                      padding: const EdgeInsets.only(left: 2.0),
+                      child: icon,
+                    );
                   }).toList(),
                 ),
                 const SizedBox(height: 10),
