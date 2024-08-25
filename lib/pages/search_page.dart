@@ -91,11 +91,7 @@ class _SearchPageState extends State<SearchPage> {
                   itemBuilder: (context, index) {
                     final audio = _searchResults[index];
                     return SongTile(
-                      title: audio.title, 
-                      artist: audio.artist, 
-                      duration: audio.duration, 
-                      sources: audio.sources, 
-                      coverUrl: audio.coverUrl,
+                      audio: audio,
                       onTap: () => _onSongSelected(audio),
                     );
                   },

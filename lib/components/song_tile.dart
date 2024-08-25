@@ -1,24 +1,26 @@
+import 'package:all_in_music/models/audio_model.dart';
+import 'package:all_in_music/providers/current_audio_provider.dart';
 import 'package:all_in_music/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:provider/provider.dart';
 
 class SongTile extends StatelessWidget {
-  final String title;
-  final String artist;
-  final int duration;
-  final String? coverUrl;
-  final Set<String> sources;
+  final Audio audio;
   final VoidCallback? onTap;
-  const SongTile({super.key, required this.title, required this.artist, required this.duration, this.coverUrl, required this.sources, this.onTap});
+  const SongTile({super.key, this.onTap, required this.audio});
 
   String formatDuration(int duration) {
     final minutes = duration ~/ 60;
     final seconds = duration % 60;
-    return '${minutes}:${seconds.toString().padLeft(2, '0')}';
+    return '$minutes:${seconds.toString().padLeft(2, '0')}';
   }
 
   @override
   Widget build(BuildContext context) {
+    final currentAudio = context.watch<CurrentAudioProvider>().currentAudio;
+    final isCurrentPlaying = currentAudio == audio;
+
     return InkWell(
       onTap: onTap,
       child: Container(
@@ -27,13 +29,16 @@ class SongTile extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.secondaryBackground,
           borderRadius: BorderRadius.circular(10),
+          border: isCurrentPlaying
+            ? Border.all(color: AppColors.primary, width: 1.5)
+            : null,
         ),
         child: Row(
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: coverUrl != null 
-              ? Image.network(coverUrl!, width: 50, height: 50, fit: BoxFit.cover,) 
+              child: audio.coverUrl != null 
+              ? Image.network(audio.coverUrl!, width: 50, height: 50, fit: BoxFit.cover,) 
               : Image.asset("assets/images/default.png", width: 50, height: 50, fit: BoxFit.cover,),
             ),
             const SizedBox(width: 10,),
@@ -42,7 +47,7 @@ class SongTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    title,
+                    audio.title,
                     style: const TextStyle(
                       color: AppColors.primaryText,
                       fontSize: 15.0,
@@ -52,7 +57,7 @@ class SongTile extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                   Text(
-                    artist,
+                    audio.artist,
                     style: const TextStyle(
                       color: AppColors.secondaryText,
                       fontSize: 13.0,
@@ -68,7 +73,7 @@ class SongTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Row(
-                  children: sources.map((source) {
+                  children: audio.sources.map((source) {
                     Widget icon;
                     switch (source) {
                       case 'VK':
@@ -88,7 +93,7 @@ class SongTile extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  formatDuration(duration),
+                  formatDuration(audio.duration),
                   style: const TextStyle(
                     color: AppColors.secondaryText,
                     fontSize: 13.0,

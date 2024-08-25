@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:collection/collection.dart';
 
 class Audio {
   final String id;
@@ -10,6 +11,21 @@ class Audio {
   String? mp3Url;
 
   Audio({required this.id, required this.title, required this.artist, required this.duration, required this.sources, this.coverUrl, this.mp3Url});
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other.runtimeType != runtimeType) return false;
+    return other is Audio &&
+      other.title == title &&
+      other.artist == artist &&
+      other.duration == duration &&
+      other.coverUrl == coverUrl &&
+      const SetEquality().equals(other.sources, sources);
+  }
+
+  @override
+  int get hashCode => Object.hash(title, artist, duration, coverUrl, sources);
 
   void addSource(String source) {
     sources.add(source);
