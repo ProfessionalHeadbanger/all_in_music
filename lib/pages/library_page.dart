@@ -24,6 +24,7 @@ class _MainPageState extends State<MainPage> {
   List<Audio> _audioList = [];
   bool _isVkMusicSelected = false;
   bool _isYandexMusicSelected = false;
+  String _currentSortOption = 'Default';
 
   @override
   void initState() {
@@ -61,16 +62,33 @@ class _MainPageState extends State<MainPage> {
     context.read<CurrentAudioProvider>().playAudio(context);
   }
 
-  List<Audio> _filterAudioList() {
+  List<Audio> _filterAndSortAudioList() {
+    List<Audio> filteredList;
+
     if (_isVkMusicSelected && !_isYandexMusicSelected) {
-      return _audioList.where((audio) => audio.sources.contains('VK')).toList();
+      filteredList = _audioList.where((audio) => audio.sources.contains('VK')).toList();
     } 
     else if (_isYandexMusicSelected && !_isVkMusicSelected) {
-      return _audioList.where((audio) => audio.sources.contains('YandexMusic')).toList();
+      filteredList = _audioList.where((audio) => audio.sources.contains('YandexMusic')).toList();
     } 
     else {
-      return _audioList;
+      filteredList = List<Audio>.from(_audioList);
     }
+
+    switch (_currentSortOption) {
+      case 'Title':
+        filteredList.sort((a, b) => a.title.compareTo(b.title));
+        break;
+      case 'Artist':
+        filteredList.sort((a, b) => a.artist.compareTo(b.artist));
+        break;
+      case 'Default':
+      default:
+        // Если выбрано "по умолчанию", не нужно сортировать
+        break;
+    }
+
+    return filteredList;
   }
 
   void _onVkFilterSelected() {
@@ -93,17 +111,31 @@ class _MainPageState extends State<MainPage> {
     });
   }
 
+  void _onSortOptionSelected(String option) {
+    setState(() {
+      _currentSortOption = option;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    final filteredAudioList = _filterAudioList();
+    final filteredAudioList = _filterAndSortAudioList();
     context.read<CurrentAudioProvider>().setAudioList(filteredAudioList);
 
     return Scaffold(
       appBar: CustomAppBar(
         title: 'Your Library',
         actions: [
-          IconButton(
-            onPressed: (){}, 
+          PopupMenuButton<String>(
+            onSelected: _onSortOptionSelected, 
+            itemBuilder: (BuildContext context) {
+              return {'Default', 'Title', 'Artist'}.map((String choice) {
+                return PopupMenuItem<String>(
+                  value: choice,
+                  child: Text(choice),
+                );
+              }).toList();
+            },
             icon: SvgPicture.asset(
               AppVectors.sortIcon,
               color: AppColors.primaryIcon,
