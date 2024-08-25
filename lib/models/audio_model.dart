@@ -12,6 +12,26 @@ class Audio {
 
   Audio({required this.id, required this.title, required this.artist, required this.duration, required this.sources, this.coverUrl, this.mp3Url});
 
+  Audio copyWith({
+    String? id,
+    String? title,
+    String? artist,
+    int? duration,
+    Set<String>? sources,
+    String? coverUrl,
+    String? mp3Url,
+  }) {
+    return Audio(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      artist: artist ?? this.artist,
+      duration: duration ?? this.duration,
+      sources: sources ?? this.sources,
+      coverUrl: coverUrl ?? this.coverUrl,
+      mp3Url: mp3Url ?? this.mp3Url,
+    );
+  }
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
@@ -82,7 +102,7 @@ Audio audioFromYandex(Map<String, dynamic> yandexTrack, Map<String, dynamic> yan
         duration: yandexTrack['durationMs'] ~/ 1000,
         sources: {'YandexMusic'},
         coverUrl: yandexAlbum['coverUri'] != null 
-            ? 'https://${yandexAlbum['coverUri'].replaceAll('%%', '200x200')}'
+            ? 'https://${yandexAlbum['coverUri'].replaceAll('%%', '1000x1000')}'
             : null,
         mp3Url: null,
       );

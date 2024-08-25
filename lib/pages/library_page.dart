@@ -21,7 +21,6 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  List<Audio> _audioList = [];
   bool _isVkMusicSelected = false;
   bool _isYandexMusicSelected = false;
   String _currentSortOption = 'Default';
@@ -29,8 +28,6 @@ class _MainPageState extends State<MainPage> {
   @override
   void initState() {
     super.initState();
-    
-    _loadAudioList();
     
     context.read<CurrentAudioProvider>().audioPlayer?.playerStateStream.listen((state) async {
       if (state.processingState == ProcessingState.completed) {
@@ -45,13 +42,6 @@ class _MainPageState extends State<MainPage> {
     });
   }
 
-  Future<void> _loadAudioList() async {
-    await context.read<AudioProvider>().loadTracksFromStorage();
-    setState(() {
-      _audioList = context.read<AudioProvider>().audioList;
-    });
-  }
-
   void _onSongSelected(Audio audio) {
     context.read<CurrentAudioProvider>().setAudio(audio);
     context.read<CurrentAudioProvider>().playAudio(context);
@@ -62,17 +52,17 @@ class _MainPageState extends State<MainPage> {
     context.read<CurrentAudioProvider>().playAudio(context);
   }
 
-  List<Audio> _filterAndSortAudioList() {
+  List<Audio> _filterAndSortAudioList(List<Audio> audioList) {
     List<Audio> filteredList;
 
     if (_isVkMusicSelected && !_isYandexMusicSelected) {
-      filteredList = _audioList.where((audio) => audio.sources.contains('VK')).toList();
+      filteredList = audioList.where((audio) => audio.sources.contains('VK')).toList();
     } 
     else if (_isYandexMusicSelected && !_isVkMusicSelected) {
-      filteredList = _audioList.where((audio) => audio.sources.contains('YandexMusic')).toList();
+      filteredList = audioList.where((audio) => audio.sources.contains('YandexMusic')).toList();
     } 
     else {
-      filteredList = List<Audio>.from(_audioList);
+      filteredList = List<Audio>.from(audioList);
     }
 
     switch (_currentSortOption) {
@@ -119,9 +109,6 @@ class _MainPageState extends State<MainPage> {
 
   @override
   Widget build(BuildContext context) {
-    final filteredAudioList = _filterAndSortAudioList();
-    context.read<CurrentAudioProvider>().setAudioList(filteredAudioList);
-
     return Scaffold(
       appBar: CustomAppBar(
         title: 'Your Library',
@@ -145,72 +132,78 @@ class _MainPageState extends State<MainPage> {
           ),
         ],
       ),
-      body: Stack(
-        children: [
-          Column(
+      body: Consumer<AudioProvider>(
+        builder: (context, audioProvider, child) {
+          final filteredAudioList = _filterAndSortAudioList(audioProvider.audioList);
+          context.read<CurrentAudioProvider>().setAudioList(filteredAudioList);
+          return Stack(
             children: [
-              Padding(
-                padding: const EdgeInsets.all(8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Row(
+              Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        FilterButton(
-                          label: 'VK Music',
-                          onPressed: _onVkFilterSelected,
-                          gradientColors: _isVkMusicSelected 
-                            ? [AppColors.primaryPressedButton, AppColors.secondaryPressedButton]
-                            : [AppColors.primaryUnpressedButton, AppColors.secondaryUnpressedButton],
+                        Row(
+                          children: [
+                            FilterButton(
+                              label: 'VK Music',
+                              onPressed: _onVkFilterSelected,
+                              gradientColors: _isVkMusicSelected 
+                                ? [AppColors.primaryPressedButton, AppColors.secondaryPressedButton]
+                                : [AppColors.primaryUnpressedButton, AppColors.secondaryUnpressedButton],
+                            ),
+                            const SizedBox(width: 10,),
+                            FilterButton(
+                              label: 'Yandex Music',
+                              onPressed: _onYandexFilterSelected,
+                              gradientColors: _isYandexMusicSelected 
+                                ? [AppColors.primaryPressedButton, AppColors.secondaryPressedButton]
+                                : [AppColors.primaryUnpressedButton, AppColors.secondaryUnpressedButton],
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 10,),
-                        FilterButton(
-                          label: 'Yandex Music',
-                          onPressed: _onYandexFilterSelected,
-                          gradientColors: _isYandexMusicSelected 
-                            ? [AppColors.primaryPressedButton, AppColors.secondaryPressedButton]
-                            : [AppColors.primaryUnpressedButton, AppColors.secondaryUnpressedButton],
-                        ),
+                        IconButton(
+                          onPressed: _onShuffleSelected, 
+                          icon: SvgPicture.asset(
+                            AppVectors.shuffle,
+                            color: AppColors.primaryIcon,
+                            width: 18,
+                            height: 18,
+                          ),
+                        )
                       ],
                     ),
-                    IconButton(
-                      onPressed: _onShuffleSelected, 
-                      icon: SvgPicture.asset(
-                        AppVectors.shuffle,
-                        color: AppColors.primaryIcon,
-                        width: 18,
-                        height: 18,
-                      ),
-                    )
-                  ],
-                ),
+                  ),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: filteredAudioList.length,
+                      itemBuilder: (context, index) {
+                        final audio = filteredAudioList[index];
+                        return SongTile(
+                          audio: audio,
+                          onTap: () => _onSongSelected(audio),
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: filteredAudioList.length,
-                  itemBuilder: (context, index) {
-                    final audio = filteredAudioList[index];
-                    return SongTile(
-                      audio: audio,
-                      onTap: () => _onSongSelected(audio),
-                    );
+              if (context.watch<CurrentAudioProvider>().currentAudio != null) Align(
+                alignment: Alignment.bottomCenter,
+                child: MiniPlayer(
+                  audio: context.watch<CurrentAudioProvider>().currentAudio!,
+                  audioPlayer: context.watch<CurrentAudioProvider>().audioPlayer!,
+                  onTap: () {
+                    context.push('/player');
                   },
                 ),
               ),
             ],
-          ),
-          if (context.watch<CurrentAudioProvider>().currentAudio != null) Align(
-            alignment: Alignment.bottomCenter,
-            child: MiniPlayer(
-              audio: context.watch<CurrentAudioProvider>().currentAudio!,
-              audioPlayer: context.watch<CurrentAudioProvider>().audioPlayer!,
-              onTap: () {
-                context.push('/player');
-              },
-            ),
-          ),
-        ],
-      ),
+          );
+        }
+      )
     );
   }
 }

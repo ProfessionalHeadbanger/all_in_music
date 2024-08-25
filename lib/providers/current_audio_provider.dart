@@ -28,6 +28,17 @@ class CurrentAudioProvider with ChangeNotifier {
     _audioList = audioList;
     _shuffledAudioList = List<Audio>.from(_audioList);
     _shuffledAudioList.shuffle();
+    _checkForEmptyAudioList();
+  }
+
+  void _checkForEmptyAudioList() {
+    if (_audioList.isEmpty) {
+      _currentAudio = null;
+      _audioPlayer.stop();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        notifyListeners();
+      });
+    }
   }
 
   void toggleShuffleMode() {

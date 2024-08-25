@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AudioProvider with ChangeNotifier {
-  final List<Audio> _audioList = [];
+  List<Audio> _audioList = [];
   
   List<Audio> get audioList => _audioList;
 
@@ -24,7 +24,7 @@ class AudioProvider with ChangeNotifier {
         _updateExistingAudio(_audioList[index], newAudio);
       }
     }
-
+    
     await _saveTracksToStorage();
     notifyListeners();
   }
@@ -39,6 +39,23 @@ class AudioProvider with ChangeNotifier {
     if (existingAudio.coverUrl == null && newAudio.coverUrl != null) {
       existingAudio.coverUrl = newAudio.coverUrl;
     }
+  }
+
+ void removeSource(String source) async {
+    _audioList = _audioList.map((audio) {
+      if (audio.sources.contains(source)) {
+        if (audio.sources.length > 1) {
+          final updatedSources = Set<String>.from(audio.sources)..remove(source);
+          return audio.copyWith(sources: updatedSources);
+        } else {
+          return null;
+        }
+      }
+      return audio;
+    }).where((audio) => audio != null).cast<Audio>().toList();
+
+    await _saveTracksToStorage();
+    notifyListeners();
   }
 
   Future<void> _saveTracksToStorage() async {

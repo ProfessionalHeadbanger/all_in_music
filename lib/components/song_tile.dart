@@ -24,7 +24,7 @@ class SongTile extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 20),
+        margin: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 16),
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           color: AppColors.secondaryBackground,

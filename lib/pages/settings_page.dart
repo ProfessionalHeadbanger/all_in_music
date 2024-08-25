@@ -22,34 +22,71 @@ class _SettingsPageState extends State<SettingsPage> {
   String? _yandexAvatarUrl;
 
   Future<void> _checkAndFetchAvatars() async {
-  final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
-  final vkToken = authProvider.vkAccessToken;
-  final yandexToken = authProvider.yandexAccessToken;
+    final vkToken = authProvider.vkAccessToken;
+    final yandexToken = authProvider.yandexAccessToken;
 
-  if (vkToken != null) {
-    final vkAvatarUrl = await getVkUserAvatar(vkToken);
-    if (vkAvatarUrl != null) {
-      setState(() {
-        _vkAvatarUrl = vkAvatarUrl;
-      });
+    if (vkToken != null) {
+      final vkAvatarUrl = await getVkUserAvatar(vkToken);
+      if (vkAvatarUrl != null) {
+        setState(() {
+          _vkAvatarUrl = vkAvatarUrl;
+        });
+      }
+    }
+
+    if (yandexToken != null) {
+      final yandexAvatarUrl = await getYandexUserAvatar(yandexToken);
+      if (yandexAvatarUrl != null) {
+        setState(() {
+          _yandexAvatarUrl = yandexAvatarUrl;
+        });
+      }
     }
   }
-
-  if (yandexToken != null) {
-    final yandexAvatarUrl = await getYandexUserAvatar(yandexToken);
-    if (yandexAvatarUrl != null) {
-      setState(() {
-        _yandexAvatarUrl = yandexAvatarUrl;
-      });
-    }
-  }
-}
 
   @override
   void initState() {
     super.initState();
     _checkAndFetchAvatars();
+  }
+
+  Future<void> _logoutFromService(String serviceName) async {
+    bool shouldLogout = await showDialog(
+      context: context, 
+      builder: (context) => AlertDialog(
+        title: Text('Logout from $serviceName'),
+        content: const Text('Are you sure?'),
+        actions: [
+          TextButton(
+            onPressed: () => context.pop(false), 
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => context.pop(true), 
+            child: const Text('Yes'),
+          ),
+        ],
+      )
+    );
+
+    if (shouldLogout) {
+      if (serviceName == 'VK Music') {
+        context.read<AuthProvider>().deleteVkAccessToken();
+        context.read<AudioProvider>().removeSource('VK');
+        setState(() {
+          _vkAvatarUrl = null;
+        });
+      }
+      else if (serviceName == 'Yandex Music') {
+        context.read<AuthProvider>().deleteYandexAccessToken();
+        context.read<AudioProvider>().removeSource('YandexMusic');
+        setState(() {
+          _yandexAvatarUrl = null;
+        });
+      }
+    }
   }
 
   @override
@@ -74,11 +111,16 @@ class _SettingsPageState extends State<SettingsPage> {
                       userAvatarUrl: _vkAvatarUrl,
                       buttonColor: AppColors.vkColor,
                       onPressed: () async {
-                        final result = await context.push('/settings/vk-auth') as List<Audio>?;
-                        if (result != null) {
-                          context.read<AudioProvider>().updateAudioList(result);
+                        if (context.read<AuthProvider>().vkAccessToken != null) {
+                          _logoutFromService('VK Music');
                         }
-                        _checkAndFetchAvatars();
+                        else {
+                          final result = await context.push('/settings/vk-auth') as List<Audio>?;
+                          if (result != null) {
+                            context.read<AudioProvider>().updateAudioList(result);
+                          }
+                          _checkAndFetchAvatars();
+                        }
                       }
                     ),
                     const SizedBox(height: 10,),
@@ -88,11 +130,16 @@ class _SettingsPageState extends State<SettingsPage> {
                       userAvatarUrl: _yandexAvatarUrl,
                       buttonColor: AppColors.yandexColor,
                       onPressed: () async {
-                        final result = await context.push('/settings/yandex-auth') as List<Audio>?;
-                        if (result != null) {
-                          context.read<AudioProvider>().updateAudioList(result);
+                        if (context.read<AuthProvider>().yandexAccessToken != null) {
+                          _logoutFromService('Yandex Music');
                         }
-                        _checkAndFetchAvatars();
+                        else {
+                          final result = await context.push('/settings/yandex-auth') as List<Audio>?;
+                          if (result != null) {
+                            context.read<AudioProvider>().updateAudioList(result);
+                          }
+                          _checkAndFetchAvatars();
+                        }
                       }
                     ),
                     const SizedBox(height: 40,),
