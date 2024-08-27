@@ -7,6 +7,10 @@ class AudioProvider with ChangeNotifier {
   
   List<Audio> get audioList => _audioList;
 
+  AudioProvider() {
+    loadTracksFromStorage();
+  }
+
   void updateAudioList(List<Audio> newAudioList) async {
     for (var newAudio in newAudioList) {
       bool isDublicate = _audioList.any((audio) => 

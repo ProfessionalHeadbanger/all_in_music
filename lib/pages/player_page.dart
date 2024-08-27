@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:overflow_text_animated/overflow_text_animated.dart';
 import 'package:provider/provider.dart';
 
 class PlayerPage extends StatelessWidget {
@@ -64,14 +65,24 @@ class PlayerPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  currentAudio.title, // Используем название трека из объекта Audio
+                OverflowTextAnimated(
+                  key: ValueKey(currentAudio.title),
+                  text: currentAudio.title, 
                   style: const TextStyle(fontSize: 22, color: AppColors.primaryText, fontWeight: FontWeight.bold),
+                  curve: Curves.fastEaseInToSlowEaseOut,
+                  animation: OverFlowTextAnimations.scrollOpposite,
+                  animateDuration: const Duration(milliseconds: 3000),
+                  delay: const Duration(milliseconds: 1000),
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  currentAudio.artist, // Используем имя исполнителя из объекта Audio
+                OverflowTextAnimated(
+                  key: ValueKey(currentAudio.artist),
+                  text: currentAudio.artist,
                   style: const TextStyle(fontSize: 14, color: AppColors.playerArtistText, fontWeight: FontWeight.bold),
+                  curve: Curves.fastEaseInToSlowEaseOut,
+                  animation: OverFlowTextAnimations.scrollOpposite,
+                  animateDuration: const Duration(milliseconds: 3000),
+                  delay: const Duration(milliseconds: 1000),
                 ),
               ],
             ),
