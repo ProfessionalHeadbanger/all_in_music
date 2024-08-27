@@ -22,26 +22,47 @@ Future<List<Audio>> fetchAudio(String accessToken) async {
     BaseOptions(
       headers: {
         "User-Agent": "KateMobileAndroid/109.1 lite-550 (Android 13; SDK 33; x86_64; Google Pixel 5; ru)",
-      }
-    )
+      },
+    ),
   );
+
   const url = 'https://api.vk.com/method/audio.get';
-  final params = {'access_token' : accessToken, 'v' : '5.199', 'count': 6000};
+  const int count = 6000;
+  int offset = 0;
+  List<Audio> audioList = [];
 
   try {
-    final response = await dio.get(url, queryParameters: params);
-    if (response.statusCode == 200) {
-      final data = response.data;
-      final List<dynamic> audioListJson = data['response']['items'];
-      List<Audio> audioList = audioListJson.map((json) => audioFromVk(json)).toList();
-      return audioList;
+    while (true) {
+      final params = {
+        'access_token': accessToken,
+        'v': '5.199',
+        'count': count,
+        'offset': offset,
+      };
+
+      final response = await dio.get(url, queryParameters: params);
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        final List<dynamic> audioListJson = data['response']['items'];
+
+        List<Audio> currentBatch = audioListJson.map((json) => audioFromVk(json)).toList();
+        
+        audioList.addAll(currentBatch);
+
+        if (currentBatch.length < count) {
+          break;
+        }
+
+        offset += count;
+      } else {
+        print('Failed to load audio: ${response.statusMessage}');
+        break;
+      }
     }
-    else {
-      print('Failed to load audio: ${response.statusMessage}');
-      return [];
-    }
-  }
-  catch (e) {
+
+    return audioList;
+  } catch (e) {
     print('Error: $e');
     return [];
   }

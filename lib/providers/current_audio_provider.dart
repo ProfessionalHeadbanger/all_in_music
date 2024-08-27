@@ -47,11 +47,14 @@ class CurrentAudioProvider with ChangeNotifier {
   }
 
   void shuffleAndPlay() {
-    _isShuffleMode = true;
-    _shuffledAudioList = List<Audio>.from(_audioList);
-    _shuffledAudioList.shuffle();
-    _currentAudio = _shuffledAudioList.first;
-    notifyListeners();
+    if (_audioList.isNotEmpty)
+    {
+      _isShuffleMode = true;
+      _shuffledAudioList = List<Audio>.from(_audioList);
+      _shuffledAudioList.shuffle();
+      _currentAudio = _shuffledAudioList.first;
+      notifyListeners();
+    }
   }
 
   void toggleRepeatMode() {
