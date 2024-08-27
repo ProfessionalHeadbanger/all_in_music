@@ -12,12 +12,15 @@ void main() async {
   final authProvider = AuthProvider();
   await authProvider.loadTokens();
 
+  final currentAudioProvider = CurrentAudioProvider();
+  await currentAudioProvider.initAudioService();
+
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AudioProvider()),
         ChangeNotifierProvider(create: (_) => authProvider),
-        ChangeNotifierProvider(create: (_) => CurrentAudioProvider()),
+        ChangeNotifierProvider(create: (_) => currentAudioProvider),
       ],
       child: const MyApp(),
     ),

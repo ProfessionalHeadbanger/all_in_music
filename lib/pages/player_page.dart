@@ -2,10 +2,10 @@ import 'package:all_in_music/assets/app_vectors.dart';
 import 'package:all_in_music/components/custom_app_bar.dart';
 import 'package:all_in_music/providers/current_audio_provider.dart';
 import 'package:all_in_music/theme/app_colors.dart';
+import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:just_audio/just_audio.dart';
 import 'package:overflow_text_animated/overflow_text_animated.dart';
 import 'package:provider/provider.dart';
 
@@ -15,7 +15,7 @@ class PlayerPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currentAudio = context.watch<CurrentAudioProvider>().currentAudio;
-    final audioPlayer = context.watch<CurrentAudioProvider>().audioPlayer;
+    final audioHandler = context.watch<CurrentAudioProvider>().audioHandler;
 
     return Scaffold(
       appBar: CustomAppBar(
@@ -96,11 +96,11 @@ class PlayerPage extends StatelessWidget {
               children: [
                 // Прогресс-бар
                 StreamBuilder<Duration?>(
-                  stream: audioPlayer!.durationStream,
+                  stream: audioHandler.mediaItem.map((item) => item?.duration),
                   builder: (context, snapshot) {
                     final duration = snapshot.data ?? Duration.zero;
                     return StreamBuilder<Duration>(
-                      stream: audioPlayer.positionStream,
+                      stream: audioHandler.playbackState.map((state) => state.position),
                       builder: (context, snapshot) {
                         var position = snapshot.data ?? Duration.zero;
                         if (position > duration) {
@@ -117,7 +117,7 @@ class PlayerPage extends StatelessWidget {
                             min: 0.0,
                             max: duration.inMilliseconds.toDouble(),
                             onChanged: (value) {
-                              audioPlayer.seek(Duration(milliseconds: value.round()));
+                              audioHandler.seek(Duration(milliseconds: value.round()));
                             },
                             activeColor: AppColors.primaryAudioProgress,
                             inactiveColor: AppColors.secondaryAudioProgress,
@@ -135,7 +135,7 @@ class PlayerPage extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       StreamBuilder<Duration>(
-                        stream: audioPlayer.positionStream,
+                        stream: audioHandler.playbackState.map((state) => state.position),
                         builder: (context, snapshot) {
                           final position = snapshot.data ?? Duration.zero;
                           final minutes = position.inMinutes.toString().padLeft(2, '0');
@@ -147,7 +147,7 @@ class PlayerPage extends StatelessWidget {
                         },
                       ),
                       StreamBuilder<Duration?>(
-                        stream: audioPlayer.durationStream,
+                        stream: audioHandler.mediaItem.map((item) => item?.duration),
                         builder: (context, snapshot) {
                           final duration = snapshot.data ?? Duration.zero;
                           final minutes = duration.inMinutes.toString().padLeft(2, '0');
@@ -195,8 +195,8 @@ class PlayerPage extends StatelessWidget {
                     },
                   ),
                   IconButton(
-                    icon: StreamBuilder<PlayerState>(
-                      stream: audioPlayer.playerStateStream, 
+                    icon: StreamBuilder<PlaybackState>(
+                      stream: audioHandler.playbackState, 
                       builder: (context, snapshot) {
                         final playerState = snapshot.data;
                         final isPlaying = playerState?.playing;
@@ -210,11 +210,11 @@ class PlayerPage extends StatelessWidget {
                     ),
                     iconSize: 64,
                     onPressed: () {
-                      if (audioPlayer.playing) {
-                        audioPlayer.pause();
+                      if (audioHandler.playbackState.value.playing) {
+                        audioHandler.pause();
                       }
                       else {
-                        audioPlayer.play();
+                        audioHandler.play();
                       }
                     },
                   ),

@@ -103,7 +103,7 @@ class _SearchPageState extends State<SearchPage> {
             alignment: Alignment.bottomCenter,
             child: MiniPlayer(
               audio: context.watch<CurrentAudioProvider>().currentAudio!,
-              audioPlayer: context.watch<CurrentAudioProvider>().audioPlayer!,
+              audioHandler: context.watch<CurrentAudioProvider>().audioHandler,
               onTap: () {
                 context.push('/player');
               },

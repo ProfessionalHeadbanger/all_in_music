@@ -1,14 +1,14 @@
 import 'package:all_in_music/models/audio_model.dart';
 import 'package:all_in_music/theme/app_colors.dart';
+import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
-import 'package:just_audio/just_audio.dart';
 
 class MiniPlayer extends StatefulWidget {
   final Audio audio;
-  final AudioPlayer audioPlayer;
+  final AudioHandler audioHandler;
   final VoidCallback? onTap;
 
-  const MiniPlayer({super.key, required this.audio, required this.audioPlayer, this.onTap});
+  const MiniPlayer({super.key, required this.audio, required this.audioHandler, this.onTap});
 
   @override
   State<MiniPlayer> createState() => _MiniPlayerState();
@@ -67,8 +67,8 @@ class _MiniPlayerState extends State<MiniPlayer> {
                   ),
                 ),
                 IconButton(
-                  icon: StreamBuilder<PlayerState>(
-                    stream: widget.audioPlayer.playerStateStream, 
+                  icon: StreamBuilder<PlaybackState>(
+                    stream: widget.audioHandler.playbackState, 
                     builder: (context, snapshot) {
                       final playerState = snapshot.data;
                       return Icon(
@@ -79,11 +79,11 @@ class _MiniPlayerState extends State<MiniPlayer> {
                     }
                   ),
                   onPressed: () {
-                    if (widget.audioPlayer.playing) {
-                      widget.audioPlayer.pause();
+                    if (widget.audioHandler.playbackState.value.playing) {
+                      widget.audioHandler.pause();
                     }
                     else {
-                      widget.audioPlayer.play();
+                      widget.audioHandler.play();
                     }
                   },
                 ),
@@ -91,17 +91,25 @@ class _MiniPlayerState extends State<MiniPlayer> {
             ),
             const SizedBox(height: 6,),
             StreamBuilder<Duration>(
-              stream: widget.audioPlayer.positionStream,
+              stream: widget.audioHandler.playbackState.map((state) => state.updatePosition),
               builder: (context, snapshot) {
                 final position = snapshot.data ?? Duration.zero;
-                return LinearProgressIndicator(
-                  value: position.inMilliseconds / (widget.audioPlayer.duration?.inMilliseconds ?? 1),
-                  backgroundColor: AppColors.secondaryAudioProgress,
-                  valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primaryAudioProgress),
-                  borderRadius: BorderRadius.circular(2),
+                return StreamBuilder<Duration?>(
+                  stream: widget.audioHandler.mediaItem.map((item) => item?.duration),
+                  builder: (context, snapshot) {
+                    final duration = snapshot.data ?? Duration.zero;
+                    return LinearProgressIndicator(
+                      value: duration.inMilliseconds > 0
+                        ? position.inMilliseconds / duration.inMilliseconds
+                        : 0.0,
+                      backgroundColor: AppColors.secondaryAudioProgress,
+                      valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primaryAudioProgress),
+                      borderRadius: BorderRadius.circular(2),
+                    );
+                  },
                 );
               },
-            ),
+            )
           ],
         ),
       ),

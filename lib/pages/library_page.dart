@@ -7,9 +7,9 @@ import 'package:all_in_music/models/audio_model.dart';
 import 'package:all_in_music/providers/audio_provider.dart';
 import 'package:all_in_music/providers/current_audio_provider.dart';
 import 'package:all_in_music/theme/app_colors.dart';
+import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:just_audio/just_audio.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 
@@ -29,15 +29,9 @@ class _MainPageState extends State<MainPage> {
   void initState() {
     super.initState();
     
-    context.read<CurrentAudioProvider>().audioPlayer?.playerStateStream.listen((state) async {
-      if (state.processingState == ProcessingState.completed) {
-        if (context.read<CurrentAudioProvider>().isRepeatMode) {
-          await context.read<CurrentAudioProvider>().audioPlayer?.seek(Duration.zero);
-          context.read<CurrentAudioProvider>().audioPlayer?.play();
-        } 
-        else {
-          await context.read<CurrentAudioProvider>().playNextTrack(context);
-        }
+    context.read<CurrentAudioProvider>().audioHandler.playbackState.listen((playbackState) async {
+      if (playbackState.processingState == AudioProcessingState.completed) {
+        await context.read<CurrentAudioProvider>().playNextTrack(context);
       }
     });
   }
@@ -48,8 +42,7 @@ class _MainPageState extends State<MainPage> {
   }
 
   void _onShuffleSelected() {
-    context.read<CurrentAudioProvider>().shuffleAndPlay();
-    context.read<CurrentAudioProvider>().playAudio(context);
+    context.read<CurrentAudioProvider>().shuffleAndPlay(context);
   }
 
   List<Audio> _filterAndSortAudioList(List<Audio> audioList) {
@@ -194,7 +187,7 @@ class _MainPageState extends State<MainPage> {
                 alignment: Alignment.bottomCenter,
                 child: MiniPlayer(
                   audio: context.watch<CurrentAudioProvider>().currentAudio!,
-                  audioPlayer: context.watch<CurrentAudioProvider>().audioPlayer!,
+                  audioHandler: context.watch<CurrentAudioProvider>().audioHandler,
                   onTap: () {
                     context.push('/player');
                   },
