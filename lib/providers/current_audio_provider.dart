@@ -12,6 +12,8 @@ class CurrentAudioProvider with ChangeNotifier {
   late AudioHandler _audioHandler;
   List<Audio> _audioList = [];
   List<Audio> _shuffledAudioList = [];
+  List<Audio> _playbackHistory = [];
+  int _currentHistoryIndex = -1;
   bool _isShuffleMode = false;
   bool _isRepeatMode = false;
 
@@ -78,14 +80,22 @@ class CurrentAudioProvider with ChangeNotifier {
   }
 
   Future<void> playPreviousTrack(BuildContext context) async {
-    if (_isShuffleMode) {
-      final currentIndex = _shuffledAudioList.indexOf(_currentAudio!);
-      final previousIndex = (currentIndex - 1 + _shuffledAudioList.length) % _shuffledAudioList.length;
-      _currentAudio = _shuffledAudioList[previousIndex];
+    if (_currentHistoryIndex > 0) {
+      _currentHistoryIndex--;
+      _currentAudio = _playbackHistory[_currentHistoryIndex];
     } else {
-      final currentIndex = _audioList.indexOf(_currentAudio!);
-      final previousIndex = (currentIndex - 1 + _audioList.length) % _audioList.length;
-      _currentAudio = _audioList[previousIndex];
+      // Если истории нет, используем стандартное поведение
+      if (_isShuffleMode) {
+        final currentIndex = _shuffledAudioList.indexOf(_currentAudio!);
+        final previousIndex = (currentIndex - 1 + _shuffledAudioList.length) % _shuffledAudioList.length;
+        _currentAudio = _shuffledAudioList[previousIndex];
+      } else {
+        final currentIndex = _audioList.indexOf(_currentAudio!);
+        final previousIndex = (currentIndex - 1 + _audioList.length) % _audioList.length;
+        _currentAudio = _audioList[previousIndex];
+      }
+      _playbackHistory.insert(0, _currentAudio!);
+      _currentHistoryIndex = 0;
     }
 
     notifyListeners();
@@ -93,6 +103,11 @@ class CurrentAudioProvider with ChangeNotifier {
   }
 
   Future<void> playNextTrack(BuildContext context) async {
+    if (_currentHistoryIndex == -1 || (_currentHistoryIndex >= 0 && _currentAudio != _playbackHistory[_currentHistoryIndex])) {
+      _playbackHistory.add(_currentAudio!);
+      _currentHistoryIndex++;
+    }
+  
     if (_isShuffleMode) {
       final currentIndex = _shuffledAudioList.indexOf(_currentAudio!);
       final nextIndex = (currentIndex + 1) % _shuffledAudioList.length;
@@ -102,6 +117,13 @@ class CurrentAudioProvider with ChangeNotifier {
       final nextIndex = (currentIndex + 1) % _audioList.length;
       _currentAudio = _audioList[nextIndex];
     }
+  
+    // Обновляем историю
+    if (_currentHistoryIndex < _playbackHistory.length - 1) {
+      _playbackHistory = _playbackHistory.sublist(0, _currentHistoryIndex + 1);
+    }
+    _playbackHistory.add(_currentAudio!);
+    _currentHistoryIndex++;
 
     notifyListeners();
     await playAudio(context);
