@@ -182,20 +182,36 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
 
   @override
   Future<void> playMediaItem(MediaItem mediaItem) async {
-    try {
-      await _audioPlayer.setUrl(mediaItem.id);
-    }
-    catch (e) {
-      print(e);
+    const int maxRetries = 3;
+    const Duration retryDelay = Duration(seconds: 1);
+    int attempt = 0;
+    bool success = false;
+    while (attempt < maxRetries && !success) {
+      try {
+        await _audioPlayer.setUrl(mediaItem.id);
+        success = true;
+      }
+      catch (e) {
+        attempt++;
+        print('Attempt $attempt failed with error: $e');
+        if (attempt < maxRetries) {
+          await Future.delayed(retryDelay);
+        }
+        else {
+          print('Max retries reached. Skipping this track.');
+          return;
+        }
+      }
     }
     
-    Duration? duration;
-    while (duration == null) {
-      duration = _audioPlayer.duration;
-      await Future.delayed(const Duration(milliseconds: 100));
-    }
-
+    if (success) {
+      Duration? duration;
+      while (duration == null) {
+        duration = _audioPlayer.duration;
+        await Future.delayed(const Duration(milliseconds: 100));
+      }
     this.mediaItem.add(mediaItem.copyWith(duration: duration));
+    }
   }
 
   @override
