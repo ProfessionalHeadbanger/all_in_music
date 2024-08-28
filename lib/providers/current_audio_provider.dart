@@ -182,7 +182,12 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
 
   @override
   Future<void> playMediaItem(MediaItem mediaItem) async {
-    await _audioPlayer.setUrl(mediaItem.id);
+    try {
+      await _audioPlayer.setUrl(mediaItem.id);
+    }
+    catch (e) {
+      print(e);
+    }
     
     Duration? duration;
     while (duration == null) {

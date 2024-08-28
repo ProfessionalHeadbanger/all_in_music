@@ -2,6 +2,7 @@ import 'package:all_in_music/assets/app_vectors.dart';
 import 'package:all_in_music/components/custom_app_bar.dart';
 import 'package:all_in_music/components/filter_button.dart';
 import 'package:all_in_music/components/mini_player.dart';
+import 'package:all_in_music/components/network_indicator.dart';
 import 'package:all_in_music/components/song_tile.dart';
 import 'package:all_in_music/models/audio_model.dart';
 import 'package:all_in_music/providers/audio_provider.dart';
@@ -193,6 +194,7 @@ class _MainPageState extends State<MainPage> {
                   },
                 ),
               ),
+              const NetworkIndicator(),
             ],
           );
         }

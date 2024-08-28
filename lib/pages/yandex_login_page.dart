@@ -44,17 +44,6 @@ class _YandexLoginPageState extends State<YandexLoginPage> {
             String url = action.toString();
             String? token = extractAccessTokenYandex(url);
             if (token == null) {
-              showDialog(
-                context: context, 
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: const Text('Unable to auth'),
-                    actions: [
-                      TextButton(onPressed: (){context.pop();}, child: const Text('OK'))
-                    ],
-                  );
-                }
-              );
               return;
             }
             else {
