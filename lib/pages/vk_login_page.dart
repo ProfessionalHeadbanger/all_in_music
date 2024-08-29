@@ -18,6 +18,8 @@ class VkLoginPage extends StatefulWidget {
 }
 
 class _VkLoginPageState extends State<VkLoginPage> {
+  bool isLoading = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,29 +36,38 @@ class _VkLoginPageState extends State<VkLoginPage> {
         title: 'VK auth',
       ),
       body: SafeArea(
-        child: InAppWebView(
+        child: isLoading
+          ? const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('Loading, don\'t close this window', style: TextStyle(fontSize: 18),),
+                  SizedBox(height: 10,),
+                  CircularProgressIndicator(),
+                ],
+              )
+            )
+          : InAppWebView(
           initialUrlRequest: URLRequest(
             url: WebUri("https://oauth.vk.com/authorize?client_id=2685278&scope=69634&redirect_uri=https://oauth.vk.com/blank.html&display=page&response_type=token&revoke=1"),
           ),
-          onLoadStop: (InAppWebViewController controller, WebUri? action) async {
-            if (action == null) {
-              return;
-            }
-            String url = action.toString();
-            if (!url.startsWith("https://oauth.vk.com/blank.html")) {
-              return;
-            }
-            String? token = extractAccessTokenVK(url);
-            if (token == null) {
-              return;
-            }
-            else {
-              context.read<AuthProvider>().setVkAccessToken(token);
-              List<Audio> audioList = await fetchAudio(token);
-              if (mounted) {
-                context.pop(audioList);
+          shouldOverrideUrlLoading: (controller, navigationAction) async {
+            String url = navigationAction.request.url.toString();
+            if (url.startsWith("https://oauth.vk.com/blank.html")) {
+              String? token = extractAccessTokenVK(url);
+              if (token != null) {
+                setState(() {
+                  isLoading = true;
+                });
+                context.read<AuthProvider>().setVkAccessToken(token);
+                List<Audio> audioList = await fetchAudio(token);
+                if (mounted) {
+                  context.pop(audioList);
+                }
               }
+              return NavigationActionPolicy.CANCEL;
             }
+            return NavigationActionPolicy.ALLOW;
           },
         )
       ),

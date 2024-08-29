@@ -107,7 +107,7 @@ class CurrentAudioProvider with ChangeNotifier {
       _playbackHistory.add(_currentAudio!);
       _currentHistoryIndex++;
     }
-  
+
     if (_isShuffleMode) {
       final currentIndex = _shuffledAudioList.indexOf(_currentAudio!);
       final nextIndex = (currentIndex + 1) % _shuffledAudioList.length;
@@ -117,8 +117,7 @@ class CurrentAudioProvider with ChangeNotifier {
       final nextIndex = (currentIndex + 1) % _audioList.length;
       _currentAudio = _audioList[nextIndex];
     }
-  
-    // Обновляем историю
+
     if (_currentHistoryIndex < _playbackHistory.length - 1) {
       _playbackHistory = _playbackHistory.sublist(0, _currentHistoryIndex + 1);
     }

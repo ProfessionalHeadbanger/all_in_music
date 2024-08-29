@@ -17,6 +17,8 @@ class YandexLoginPage extends StatefulWidget {
 }
 
 class _YandexLoginPageState extends State<YandexLoginPage> {
+  bool isLoading = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -33,27 +35,37 @@ class _YandexLoginPageState extends State<YandexLoginPage> {
         title: 'Yandex auth',
       ),
       body: SafeArea(
-        child: InAppWebView(
+        child: isLoading
+        ? const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('Loading, don\'t close this window', style: TextStyle(fontSize: 18),),
+                  SizedBox(height: 10,),
+                  CircularProgressIndicator(),
+                ],
+              )
+            )
+        : InAppWebView(
           initialUrlRequest: URLRequest(
             url: WebUri("https://oauth.yandex.ru/authorize?response_type=token&client_id=23cabbbdc6cd418abb4b39c32c41195d"),
           ),
-          onLoadStop: (InAppWebViewController controller, WebUri? action) async {
-            if (action == null) {
-              return;
-            }
-            String url = action.toString();
+          shouldOverrideUrlLoading: (controller, navigationAction) async {
+            String url = navigationAction.request.url.toString();
             String? token = extractAccessTokenYandex(url);
-            if (token == null) {
-              return;
-            }
-            else {
+            if (token != null) {
+              setState(() {
+                isLoading = true;
+              });
               context.read<AuthProvider>().setYandexAccessToken(token);
               final userId = await getYandexUserId(token);
               final tracks = await getYandexFavorites(token, userId!);
               if (mounted) {
                 context.pop(tracks);
               }
+              return NavigationActionPolicy.CANCEL;
             }
+            return NavigationActionPolicy.ALLOW;
           },
         )
       ),
