@@ -130,6 +130,7 @@ class CurrentAudioProvider with ChangeNotifier {
 
   Future<void> playAudio(BuildContext context) async {
     if (_currentAudio == null) return;
+    if (_audioPlayer.playing) await _audioPlayer.stop();
     String? url;
     if (_currentAudio!.sources.contains('VK')) {
       url = _currentAudio!.mp3Url;
