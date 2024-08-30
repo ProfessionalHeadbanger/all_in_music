@@ -53,7 +53,7 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Future<void> _logoutFromService(String serviceName) async {
-    bool shouldLogout = await showDialog(
+    bool? shouldLogout = await showDialog<bool?>(
       context: context, 
       builder: (context) => AlertDialog(
         title: Text('Logout from $serviceName'),
@@ -70,6 +70,8 @@ class _SettingsPageState extends State<SettingsPage> {
         ],
       )
     );
+
+    shouldLogout = shouldLogout ?? false;
 
     if (shouldLogout) {
       if (serviceName == 'VK Music') {
