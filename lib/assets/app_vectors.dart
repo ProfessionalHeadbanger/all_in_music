@@ -11,5 +11,9 @@ class AppVectors {
   static const String skipBack = '${basePath}skip-back$format';
   static const String skipForward = '${basePath}skip-forward$format';
   static const String chevronLeft = '${basePath}chevron-left$format';
+  static const String chevronDown = '${basePath}chevron-down$format';
   static const String moreHorizontal = '${basePath}more-horizontal$format';
+
+  static const String vkLogo = '${basePath}VK$format';
+  static const String yandexLogo = '${basePath}YandexMusic$format';
 }

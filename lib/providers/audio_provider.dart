@@ -43,6 +43,10 @@ class AudioProvider with ChangeNotifier {
     if (existingAudio.coverUrl == null && newAudio.coverUrl != null) {
       existingAudio.coverUrl = newAudio.coverUrl;
     }
+
+    newAudio.trackLinks.forEach((key, value) {
+      existingAudio.trackLinks[key] = value;
+    });
   }
 
  void removeSource(String source) async {
@@ -50,7 +54,8 @@ class AudioProvider with ChangeNotifier {
       if (audio.sources.contains(source)) {
         if (audio.sources.length > 1) {
           final updatedSources = Set<String>.from(audio.sources)..remove(source);
-          return audio.copyWith(sources: updatedSources);
+          final updatedTrackLinks = Map<String, String>.from(audio.trackLinks)..remove(source);
+          return audio.copyWith(sources: updatedSources, trackLinks: updatedTrackLinks);
         } else {
           return null;
         }

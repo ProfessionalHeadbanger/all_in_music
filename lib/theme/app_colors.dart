@@ -27,4 +27,6 @@ class AppColors {
   static const yandexColor = Color(0xffFC3F1D);
 
   static const searchBar = Color(0xffF6E8FF);
+
+  static const shareMenu = Color(0xff382F4E);
 }

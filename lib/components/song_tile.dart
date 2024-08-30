@@ -1,3 +1,4 @@
+import 'package:all_in_music/assets/app_vectors.dart';
 import 'package:all_in_music/models/audio_model.dart';
 import 'package:all_in_music/providers/current_audio_provider.dart';
 import 'package:all_in_music/theme/app_colors.dart';
@@ -77,10 +78,10 @@ class SongTile extends StatelessWidget {
                     Widget icon;
                     switch (source) {
                       case 'VK':
-                        icon = SvgPicture.asset("assets/vectors/VK.svg", color: AppColors.primaryText, width: 20, height: 20);
+                        icon = SvgPicture.asset(AppVectors.vkLogo, color: AppColors.primaryText, width: 20, height: 20);
                         break;
                       case 'YandexMusic':
-                        icon = SvgPicture.asset("assets/vectors/YandexMusic.svg", color: AppColors.primaryText, width: 20, height: 20);
+                        icon = SvgPicture.asset(AppVectors.yandexLogo, color: AppColors.primaryText, width: 20, height: 20);
                         break;
                       default:
                         icon = Container();

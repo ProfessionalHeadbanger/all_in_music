@@ -8,9 +8,72 @@ import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:overflow_text_animated/overflow_text_animated.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 class PlayerPage extends StatelessWidget {
   const PlayerPage({super.key});
+
+  void _showShareMenu(BuildContext context, Map<String, String> trackLinks) {
+    showModalBottomSheet(
+      context: context, 
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: AppColors.shareMenu,
+            borderRadius: BorderRadius.only(topLeft: Radius.circular(30), topRight: Radius.circular(30)),
+          ),
+          child: SafeArea(
+            child: Container(
+              padding: const EdgeInsets.only(top: 20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: trackLinks.entries.map((entry) {
+                    return ListTile(
+                      leading: _getServiceIcon(entry.key),
+                      title: Text('Share from ${_getServiceName(entry.key)}', style: const TextStyle(color: AppColors.primaryText),),
+                      onTap: () {
+                        _shareTrack(entry.value);
+                      },
+                    );
+                }).toList(),
+              ),
+            )
+          ),
+        );
+      }
+    );
+  }
+
+  Widget _getServiceIcon(String key) {
+    switch (key) {
+      case 'VK':
+        return SvgPicture.asset(AppVectors.vkLogo);
+      case 'YandexMusic':
+        return SvgPicture.asset(AppVectors.yandexLogo);
+      default:
+        return const Icon(Icons.share);
+    }
+  }
+
+  String _getServiceName(String key) {
+    switch (key) {
+      case 'VK':
+        return 'VK Music';
+      case 'YandexMusic':
+        return 'Yandex Music';
+      default:
+        return key;
+    }
+  }
+
+  void _shareTrack(String url) async {
+    final result = await Share.share(url);
+    if (result.status == ShareResultStatus.success)
+    {
+      print('Shared: $url');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +93,7 @@ class PlayerPage extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            onPressed: (){}, 
+            onPressed: () => _showShareMenu(context, currentAudio!.trackLinks), 
             icon: SvgPicture.asset(
                   AppVectors.moreHorizontal,
                   color: AppColors.primaryIcon,
