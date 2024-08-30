@@ -6,6 +6,7 @@ import 'package:all_in_music/components/network_indicator.dart';
 import 'package:all_in_music/components/song_tile.dart';
 import 'package:all_in_music/models/audio_model.dart';
 import 'package:all_in_music/providers/audio_provider.dart';
+import 'package:all_in_music/providers/auth_provider.dart';
 import 'package:all_in_music/providers/current_audio_provider.dart';
 import 'package:all_in_music/theme/app_colors.dart';
 import 'package:audio_service/audio_service.dart';
@@ -171,7 +172,18 @@ class _MainPageState extends State<MainPage> {
                     ),
                   ),
                   Expanded(
-                    child: ListView.builder(
+                    child: context.watch<AuthProvider>().isSync
+                    ? const Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text('Your songs is loading', style: TextStyle(fontSize: 18),),
+                            SizedBox(height: 10,),
+                            CircularProgressIndicator(),
+                          ],
+                        )
+                      )
+                    : ListView.builder(
                       itemCount: filteredAudioList.length,
                       itemBuilder: (context, index) {
                         final audio = filteredAudioList[index];

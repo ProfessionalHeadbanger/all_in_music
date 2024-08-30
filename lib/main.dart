@@ -39,6 +39,19 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   int currentIndex = 0;
 
+  void _syncTracks() {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    authProvider.syncTracks(context);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _syncTracks();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(

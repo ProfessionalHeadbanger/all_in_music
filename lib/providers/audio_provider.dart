@@ -83,4 +83,11 @@ class AudioProvider with ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<void> clearTracks() async {
+    _audioList.clear();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('savedTracks');
+    notifyListeners();
+  }
 }
